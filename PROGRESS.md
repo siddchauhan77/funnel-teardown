@@ -6,8 +6,8 @@
 
 ## Current Checkpoint
 
-**Status:** v1 complete. All code written, tests passing, pushed to GitHub.
-**Blocked on:** Railway deployment (requires browser login — see Open Tasks).
+**Status:** v1 complete and LIVE.
+**Live URL:** https://funnelteardownai.up.railway.app
 **Last worked on:** 2026-04-05
 
 ---
@@ -45,13 +45,7 @@
 
 These require interactive steps (browser, account access) that can't be scripted:
 
-- [ ] **Deploy to Railway**
-  1. `~/bin/railway login` (opens browser)
-  2. `cd ~/funnel-teardown && ~/bin/railway init` (creates Railway project, link to GitHub repo)
-  3. `~/bin/railway variables set OPENAI_API_KEY=sk-...`
-  4. `~/bin/railway variables set ANTHROPIC_API_KEY=sk-ant-...`
-  5. `~/bin/railway up` — deploys, gives you a live URL
-  6. Test with: enter `AG1` + `ag1.com` in the form
+- [x] **Deploy to Railway** — live at https://funnelteardownai.up.railway.app
 
 - [ ] **Run a live smoke test** — try it on Justin Welsh (`justinwelsh.me`), Athletic Greens (`ag1.com`), or Alex Hormozi. Verify report quality, cost < $0.50, Mermaid renders.
 

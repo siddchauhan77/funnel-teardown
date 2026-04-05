@@ -2,7 +2,7 @@
 
 > Reverse-engineer any brand's funnel in minutes. Drop a brand name, get a full stranger-to-advocate map with Bustamante-style What's Working / What's Missing analysis.
 
-**Live demo:** [ag1-teardown report](https://funnelteardown.vercel.app/demo/ag1-teardown.html)
+**Live app:** [funnelteardownai.up.railway.app](https://funnelteardownai.up.railway.app)
 
 ---
 
