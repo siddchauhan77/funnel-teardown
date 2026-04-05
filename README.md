@@ -1,56 +1,120 @@
 # FunnelTeardown AI
 
-> Reverse-engineer any brand's funnel in minutes. Drop a brand name, get a full stranger-to-advocate map with Bustamante-style What's Working / What's Missing analysis.
+**Reverse-engineer any brand's customer acquisition funnel using a multi-agent AI pipeline. Drop a brand name, get a full structured report in under 60 seconds for under $0.50.**
 
-**Live app:** [funnelteardownai.up.railway.app](https://funnelteardownai.up.railway.app)
-
----
-
-## What it does
-
-FunnelTeardown AI runs three sequential AI agents against any brand name, then generates a standalone HTML report showing:
-
-- **Awareness Coverage Map** — which of Schwartz's 7 stages the brand actively reaches (gaps = opportunities)
-- **Funnel Journey Diagram** — Mermaid.js flowchart from stranger → advocate
-- **Step-by-step analysis** — What's Working / What's Missing for every funnel step
-- **Offer stack** — every offer identified with price, type, and stage
-- **Open questions** — honest flags on what couldn't be determined from public data
-
-Total cost: under $0.50 per run.
+🔗 **[Try it live → funnelteardownai.up.railway.app](https://funnelteardownai.up.railway.app)**
+&nbsp;&nbsp;|&nbsp;&nbsp;
+📦 **[github.com/siddchauhan77/funnel-teardown](https://github.com/siddchauhan77/funnel-teardown)**
 
 ---
 
-## How it works
+## The Problem
+
+Marketers, founders, and growth teams spend hours manually researching competitor funnels — scrolling through social channels, clicking through landing pages, trying to piece together how a brand moves a stranger to a paying customer. The output is usually a messy Google Doc that goes stale in a week.
+
+There's no tool that does this systematically, maps it to a framework, and flags what's working vs. what's missing — in minutes, not hours.
+
+---
+
+## What I Built
+
+A three-agent AI pipeline that takes a brand name as input and returns:
+
+- **Awareness Coverage Map** — which of Schwartz's 7 stages the brand actively reaches, and which are gaps
+- **Funnel Journey Diagram** — Mermaid.js flowchart tracing the stranger → advocate pathway
+- **Step-by-step analysis** — per-step What's Working / What's Missing in the style of Daniel Bustamante's FunnelBreakdowns newsletter
+- **Offer stack** — every offer identified with price, type, and target awareness stage
+- **Open questions** — honest epistemic flags on what couldn't be determined from public data alone
+
+The whole thing runs as a **live web app** with real-time streaming progress (SSE), light/dark mode, and a full-screen report viewer. It also works as a CLI tool for developers.
+
+**Cost per run: $0.15–0.35. Runtime: 30–60 seconds.**
+
+---
+
+## Architecture & Key Decisions
 
 ```
-Brand name
-    ↓
-Agent 1: Brand Resolver     (gpt-4o-mini + web search)
-    → brand name, website, founder, ICP, confidence
-    ↓
-Agent 2: Touchpoint Mapper  (gpt-4o-mini + web search + homepage scrape)
-    → all public channels tagged by awareness level
-    ↓
-Agent 3: Journey Mapper     (claude-sonnet-4-6)
-    → full funnel steps, offers, what's working/missing, open questions
-    ↓
-HTML Renderer               (pure Python, no LLM)
-    → dark-mode report with Mermaid.js diagrams
+User Input (brand + website)
+        │
+        ▼
+Agent 1: Brand Resolver          gpt-4o-mini-search-preview
+  → official name, website,      OpenAI Responses API (built-in web search)
+    founder, ICP, confidence
+        │
+        ▼
+Agent 2: Touchpoint Mapper       gpt-4o-mini-search-preview + httpx
+  → all public channels          web search + homepage scraping
+    tagged by awareness level    extracts brand color + logo from meta tags
+        │
+        ▼
+Agent 3: Journey Mapper          claude-sonnet-4-6
+  → funnel steps, offers,        Anthropic SDK (reasoning-heavy task)
+    what's working/missing,
+    open questions
+        │
+        ▼
+HTML Renderer                    Pure Python — no LLM, no cost
+  → standalone report with       brand-colored, dark/light mode,
+    Mermaid.js diagrams          self-contained HTML file
 ```
 
-Each agent writes to a shared `TeardownState` (Pydantic model) cached to `.tmp/`. Any agent can be re-run in isolation without repeating the others.
+### Why three agents instead of one?
+
+The tasks have different cost/quality profiles. Brand resolution and touchpoint discovery are lookup tasks — cheap GPT-4o-mini with web search handles them well at ~$0.01/call. Journey mapping is reasoning-heavy and benefits from Claude's longer context and analytical depth. Splitting them keeps the total run cost under $0.35 while maintaining quality where it matters.
+
+Each agent writes to a shared `TeardownState` (Pydantic model) cached to `.tmp/` as JSON. Any single agent can be re-run in isolation without repeating the others — critical during development and useful when iterating on the journey mapping prompt without paying for web search again.
+
+### Why Railway instead of Vercel?
+
+The pipeline takes 30–60 seconds. Vercel's free tier kills serverless functions at 10 seconds. Railway runs a persistent Python process with no timeout ceiling. The `Procfile` + `railway.toml` config is already in the repo — one-command deploy.
+
+### Why SSE instead of WebSockets?
+
+Server-Sent Events are unidirectional (server → client), which is all that's needed for streaming agent progress. They work over standard HTTP with no protocol upgrade, no connection state to manage, and no library on the client side — just `fetch()` with a `ReadableStream` reader. Simpler, more reliable, good enough.
+
+### Why Pydantic v2 for everything?
+
+The `FunnelMap` model tree (`Brand`, `Touchpoint`, `JourneyStep`, `Offer`, `RunMetadata`) serves as the contract between all three agents, the renderer, and the CLI. Pydantic validates every LLM output at the boundary — if Claude returns a bad `awareness_level` string, it fails loudly at parse time rather than silently corrupting the report. It also makes JSON serialization and cache round-trips trivial.
 
 ---
 
-## Prerequisites
+## Technical Highlights
 
-- Python 3.9+
-- OpenAI API key (for Agents 1 & 2)
-- Anthropic API key (for Agent 3)
+**Multi-agent orchestration** — sequential pipeline with shared typed state, per-agent cost tracking, and selective re-run capability (`--from-cache --agent N`)
+
+**Real-time SSE streaming** — FastAPI background thread pushes agent progress events to the browser via a `queue.Queue`. The async event loop drains the queue without blocking, so the UI updates live as each agent completes
+
+**Brand color theming** — Agent 2 scrapes `<meta name="theme-color">` and `og:image` from the brand homepage. The report renderer uses the extracted hex color as the CSS `--accent` variable, so each report feels visually native to the brand being analyzed
+
+**Security** — all server data inserted into `innerHTML` is HTML-escaped through an `esc()` helper to prevent XSS. API keys live server-side only, never exposed to the client
+
+**Test suite** — 42 tests across models, cost tracker, state cache, all three agents (fully mocked — no real API calls), HTML renderer, and CLI integration. Tests enforce the `response.output` iteration contract so any SDK change that breaks the parsing fails immediately
+
+**Cost tracking** — `CostTracker` records input/output tokens per agent, computes USD cost using a model pricing table, and reports a full breakdown in the report footer and CLI output
 
 ---
 
-## Installation
+## Stack
+
+| Layer | Technology |
+|---|---|
+| Backend | Python 3.11, FastAPI, uvicorn |
+| AI — Agents 1 & 2 | OpenAI Responses API (`gpt-4o-mini-search-preview`) |
+| AI — Agent 3 | Anthropic SDK (`claude-sonnet-4-6`) |
+| Web scraping | httpx + BeautifulSoup4 |
+| Data models | Pydantic v2 |
+| Frontend | Vanilla JS SPA (no framework) |
+| Diagrams | Mermaid.js |
+| CLI output | Rich |
+| Hosting | Railway (nixpacks) |
+| Tests | pytest + pytest-mock |
+
+---
+
+## Running it yourself
+
+**Prerequisites:** Python 3.9+, OpenAI API key, Anthropic API key
 
 ```bash
 git clone https://github.com/siddchauhan77/funnel-teardown
@@ -58,181 +122,86 @@ cd funnel-teardown
 pip3 install -r requirements.txt
 ```
 
----
-
-## Setup
-
-Copy the env template and add your keys:
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env`:
+Create a `.env` file:
 
 ```
 OPENAI_API_KEY=sk-...
 ANTHROPIC_API_KEY=sk-ant-...
 ```
 
----
-
-## Usage
-
-### Basic teardown
+**Run a teardown:**
 
 ```bash
-python3 teardown.py "Athletic Greens"
-```
-
-### With disambiguation hints
-
-If the brand name is ambiguous (e.g. "Apple"), pass hints:
-
-```bash
-python3 teardown.py "Justin Welsh" --url "justinwelsh.me"
+python3 teardown.py "Athletic Greens" --url ag1.com
+python3 teardown.py "Justin Welsh" --url justinwelsh.me
 python3 teardown.py "Alex Hormozi" --founder "Alex Hormozi"
 ```
 
-### Re-run a single agent
-
-Each agent's output is cached. Use `--from-cache` + `--agent N` to re-run just one step without paying for the others:
+**Run the web app locally:**
 
 ```bash
-# Re-run only Agent 3 (journey mapping) using cached brand + touchpoints
+uvicorn web.app:app --host 0.0.0.0 --port 8000
+# open http://localhost:8000
+```
+
+**Re-run a single agent (without paying for the others):**
+
+```bash
 python3 teardown.py "Justin Welsh" --from-cache --agent 3
-
-# Re-run from Agent 2 onward
-python3 teardown.py "Justin Welsh" --from-cache --agent 2
 ```
 
-### All flags
+**Run the tests:**
 
-```
-python3 teardown.py "Brand Name"
-  --founder "Founder Name"   Disambiguation hint (adds to Agent 1 prompt)
-  --url "website.com"        Website hint (adds to Agent 1 prompt)
-  --from-cache               Load .tmp/ cache instead of re-running Agent 1+2
-  --agent N                  Start from agent N (1, 2, or 3). Use with --from-cache.
+```bash
+python3 -m pytest tests/ -v
+# 42 passed, no API calls made
 ```
 
 ---
 
 ## Output
 
-Each run creates a timestamped folder in `output/`:
+Each CLI run creates a timestamped folder in `output/`:
 
 ```
 output/
   athletic_greens_20260405_143022/
-    funnel_map.json       ← full structured data (Pydantic FunnelMap)
-    teardown_report.html  ← standalone dark-mode HTML report
+    funnel_map.json       ← full structured data (FunnelMap Pydantic model)
+    teardown_report.html  ← standalone HTML report, no server needed
 ```
-
-Open `teardown_report.html` in any browser — no server needed, fully self-contained.
 
 ---
 
-## Report sections
+## Awareness level framework
 
-| Section | What you see |
+FunnelTeardown maps every touchpoint, journey step, and offer to Schwartz's 5 Levels of Awareness — extended to 7 to include post-purchase:
+
+| Level | What it means |
 |---|---|
-| **Stats bar** | Touchpoint count, steps, offers, questions, total cost |
-| **Brand Overview** | Name, website, founder, description, ICP, confidence |
-| **Awareness Coverage Map** | Color-coded grid — which Schwartz stages are covered |
-| **Funnel Journey Diagram** | Mermaid.js flowchart with awareness-level coloring |
-| **Step Analysis** | Per-step What's Working / What's Missing cards |
-| **Offers** | All offers with price, type, stage, confidence |
-| **Open Questions** | What couldn't be determined from public data |
-| **Run Details** | Agent → model → cost breakdown |
+| Unaware | Doesn't know the problem exists |
+| Problem Aware | Knows the problem, not the solution |
+| Solution Aware | Knows solutions exist, not this brand |
+| Product Aware | Knows this brand, hasn't bought |
+| Most Aware | Ready to buy, needs a nudge |
+| Customer | Has purchased — retention phase |
+| Advocate | Active referrer or community member |
+
+The coverage map in the report shows which stages the brand actively reaches and which are gaps — a direct input for channel strategy decisions.
 
 ---
 
-## Awareness levels
+## Roadmap
 
-FunnelTeardown uses Schwartz's 5 Levels of Awareness extended to 7:
+See [`PROGRESS.md`](./PROGRESS.md) for the full checkpoint log and what's coming.
 
-| Level | Color | What it means |
-|---|---|---|
-| Unaware | Gray | Doesn't know the problem exists |
-| Problem Aware | Amber | Knows the problem, not the solution |
-| Solution Aware | Blue | Knows solutions exist, not this brand |
-| Product Aware | Purple | Knows this brand, hasn't bought |
-| Most Aware | Green | Ready to buy, needs a reason |
-| Customer | Dark green | Has purchased, retention phase |
-| Advocate | Pink | Active referrer/promoter |
-
----
-
-## Project structure
-
-```
-funnel-teardown/
-├── teardown.py              CLI entry point
-├── agents/
-│   ├── brand_resolver.py    Agent 1 — GPT-4o-mini web search
-│   ├── touchpoint_mapper.py Agent 2 — GPT-4o-mini + httpx scraping
-│   └── journey_mapper.py    Agent 3 — Claude Sonnet
-├── models/
-│   └── funnel_map.py        All Pydantic models
-├── report/
-│   └── html_renderer.py     Pure Python HTML generator
-├── state/
-│   └── teardown_state.py    Shared state + .tmp/ cache
-├── utils/
-│   └── cost_tracker.py      Per-agent token cost tracking
-├── tests/                   42 tests, all passing
-├── demo/
-│   └── ag1-teardown.html    Sample report (AG1 Athletic Greens)
-└── .env.example             API key template
-```
-
----
-
-## Running tests
-
-```bash
-python3 -m pytest tests/ -v
-```
-
-All 42 tests pass. No API calls made — agents are fully mocked.
-
----
-
-## Cost reference
-
-| Agent | Model | Typical cost |
-|---|---|---|
-| Brand Resolver | gpt-4o-mini | ~$0.002 |
-| Touchpoint Mapper | gpt-4o-mini | ~$0.010 |
-| Journey Mapper | claude-sonnet-4-6 | ~$0.15–0.30 |
-| **Total** | | **~$0.15–0.35** |
-
----
-
-## Tips
-
-**Ambiguous brand names** — if the tool raises `ValueError: Brand '...' is ambiguous`, re-run with `--url` or `--founder` to help Agent 1 pick the right brand.
-
-**Creators vs. enterprises** — works for both. Creator funnels (newsletters, cohorts, digital products) tend to produce 4–6 steps. Enterprise brands (AG1, Hubspot) produce 6–10 steps.
-
-**Iterating on Agent 3** — journey mapping is the most expensive and most creative step. If you want to tweak the output, use `--from-cache --agent 3` to re-run only Agent 3 without paying for the web search agents again.
-
-**Reading the report** — open `teardown_report.html` directly in Chrome/Safari/Firefox. The Mermaid.js diagram renders client-side via CDN — you need an internet connection for the diagram to appear.
-
----
-
-## Built with
-
-- [OpenAI Python SDK](https://github.com/openai/openai-python) — Agents 1 & 2 (Responses API with web search)
-- [Anthropic Python SDK](https://github.com/anthropics/anthropic-sdk-python) — Agent 3
-- [Pydantic v2](https://docs.pydantic.dev/) — data models and state
-- [httpx](https://www.python-httpx.org/) + [BeautifulSoup4](https://www.crummy.com/software/BeautifulSoup/) — homepage scraping
-- [Mermaid.js](https://mermaid.js.org/) — funnel flowchart diagrams
-- [Rich](https://github.com/Textualize/rich) — CLI output
+**v2 planned:** Supabase auth (user accounts + run history) + Stripe credit-based billing to offset API costs and capture margin. Free tier → credit packs → subscription tiers.
 
 ---
 
 ## License
 
-MIT
+MIT — use it, fork it, build on it.
+
+---
+
+*Built by [Sidd Chauhan](https://github.com/siddchauhan77)*
