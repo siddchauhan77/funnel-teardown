@@ -18,10 +18,10 @@ def test_awareness_level_rejects_invalid():
         AwarenessLevel("confused")
 
 
-def test_brand_requires_name_and_website():
+def test_brand_requires_all_fields():
     with pytest.raises(ValidationError):
-        Brand(name="", website="", description="d", primary_icp="i",
-              confidence="high", evidence=[])
+        Brand(name="AG1", website="ag1.com",
+              confidence="high", evidence=[])  # missing description and primary_icp
 
 
 def test_brand_valid():

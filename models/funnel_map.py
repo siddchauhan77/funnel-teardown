@@ -1,7 +1,7 @@
 from __future__ import annotations
 from enum import Enum
 from typing import Literal, Optional
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel
 
 
 class AwarenessLevel(str, Enum):
@@ -40,13 +40,6 @@ class Brand(BaseModel):
     primary_icp: str
     confidence: Confidence
     evidence: list[str]
-
-    @field_validator("name", "website")
-    @classmethod
-    def must_not_be_empty(cls, v: str) -> str:
-        if not v.strip():
-            raise ValueError("must not be empty")
-        return v
 
 
 class Touchpoint(BaseModel):
