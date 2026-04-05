@@ -8,6 +8,8 @@ from datetime import datetime
 from pathlib import Path
 
 from dotenv import load_dotenv
+load_dotenv()  # Must run before agent imports so API keys are in os.environ
+
 from rich.console import Console
 from rich.table import Table
 
@@ -17,8 +19,6 @@ from agents.journey_mapper import map_journey
 from report.html_renderer import render_html
 from state.teardown_state import TeardownState, slug_for
 from utils.cost_tracker import CostTracker
-
-load_dotenv()
 
 OUTPUT_DIR = Path("output")
 console = Console()

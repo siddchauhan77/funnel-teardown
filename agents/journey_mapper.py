@@ -10,7 +10,8 @@ from state.teardown_state import TeardownState
 from utils.cost_tracker import CostTracker
 from models.funnel_map import JourneyStep, Offer
 
-anthropic_client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY", "sk-ant-placeholder"))
+def _get_client() -> anthropic.Anthropic:
+    return anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 SYSTEM_PROMPT = """You are a funnel strategist who reverse-engineers brand acquisition funnels.
 You think through the lens of Eugene Schwartz's 5 levels of awareness, extended to include
@@ -85,7 +86,7 @@ def map_journey(state: TeardownState, tracker: CostTracker) -> None:
         f"\nMap the full funnel journey for this brand."
     )
 
-    response = anthropic_client.messages.create(
+    response = _get_client().messages.create(
         model="claude-sonnet-4-6",
         max_tokens=4096,
         system=SYSTEM_PROMPT,

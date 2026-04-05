@@ -13,7 +13,9 @@ from state.teardown_state import TeardownState
 from utils.cost_tracker import CostTracker
 from models.funnel_map import Touchpoint
 
-openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY", "sk-placeholder"))
+def _get_client() -> OpenAI:
+    return OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
 http_client = httpx.Client(timeout=15, follow_redirects=True,
                            headers={"User-Agent": "Mozilla/5.0 (compatible; FunnelTeardown/1.0)"})
 
@@ -74,18 +76,29 @@ def map_touchpoints(state: TeardownState, tracker: CostTracker) -> None:
         f"\nHomepage links found:\n{homepage_links}"
     )
 
-    response = openai_client.responses.create(
-        model="gpt-4o-mini-search-preview",
+    response = _get_client().responses.create(
+        model="gpt-4o-mini",
         instructions=SYSTEM_PROMPT,
         input=prompt,
+        tools=[{"type": "web_search_preview"}],
     )
 
     tracker.record(
         "touchpoint_mapper",
-        "gpt-4o-mini-search-preview",
+        "gpt-4o-mini",
         input_tokens=response.usage.input_tokens,
         output_tokens=response.usage.output_tokens,
     )
 
-    raw = json.loads(response.output_text)
+    # Extract text from Responses API output (may contain web_search + message items)
+    output_text = ""
+    for item in response.output:
+        if hasattr(item, "content"):
+            for block in item.content:
+                if hasattr(block, "text"):
+                    output_text += block.text
+        elif hasattr(item, "text"):
+            output_text += item.text
+
+    raw = json.loads(output_text)
     state.funnel_map.touchpoints = [Touchpoint(**t) for t in raw]

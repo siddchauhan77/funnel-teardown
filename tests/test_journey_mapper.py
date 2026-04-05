@@ -91,8 +91,8 @@ def test_map_journey_populates_steps_and_offers():
     mock_response.usage.input_tokens = 3000
     mock_response.usage.output_tokens = 1500
 
-    with patch("agents.journey_mapper.anthropic_client") as mock_client:
-        mock_client.messages.create.return_value = mock_response
+    with patch("agents.journey_mapper._get_client") as mock_get_client:
+        mock_get_client.return_value.messages.create.return_value = mock_response
         map_journey(state, tracker)
 
     assert len(state.funnel_map.journey_steps) == 2
@@ -110,8 +110,8 @@ def test_map_journey_records_cost():
     mock_response.usage.input_tokens = 3000
     mock_response.usage.output_tokens = 1500
 
-    with patch("agents.journey_mapper.anthropic_client") as mock_client:
-        mock_client.messages.create.return_value = mock_response
+    with patch("agents.journey_mapper._get_client") as mock_get_client:
+        mock_get_client.return_value.messages.create.return_value = mock_response
         map_journey(state, tracker)
 
     assert tracker.agent_cost("journey_mapper") > 0
@@ -126,8 +126,8 @@ def test_map_journey_whats_working_populated():
     mock_response.usage.input_tokens = 3000
     mock_response.usage.output_tokens = 1500
 
-    with patch("agents.journey_mapper.anthropic_client") as mock_client:
-        mock_client.messages.create.return_value = mock_response
+    with patch("agents.journey_mapper._get_client") as mock_get_client:
+        mock_get_client.return_value.messages.create.return_value = mock_response
         map_journey(state, tracker)
 
     step = state.funnel_map.journey_steps[0]

@@ -10,7 +10,8 @@ from state.teardown_state import TeardownState
 from utils.cost_tracker import CostTracker
 from models.funnel_map import Brand
 
-openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY", "sk-placeholder"))
+def _get_client() -> OpenAI:
+    return OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 SYSTEM_PROMPT = """You are a brand research assistant. Given a brand name (and optional hints),
 search the web to identify the correct brand and return a JSON object with this exact structure:
@@ -47,20 +48,31 @@ def resolve_brand(state: TeardownState, tracker: CostTracker) -> None:
     hint_str = ("\n\nAdditional hints:\n" + "\n".join(hint_parts)) if hint_parts else ""
     prompt = f"Research the brand: {state.brand_input}{hint_str}"
 
-    response = openai_client.responses.create(
-        model="gpt-4o-mini-search-preview",
+    response = _get_client().responses.create(
+        model="gpt-4o-mini",
         instructions=SYSTEM_PROMPT,
         input=prompt,
+        tools=[{"type": "web_search_preview"}],
     )
 
     tracker.record(
         "brand_resolver",
-        "gpt-4o-mini-search-preview",
+        "gpt-4o-mini",
         input_tokens=response.usage.input_tokens,
         output_tokens=response.usage.output_tokens,
     )
 
-    data = json.loads(response.output_text)
+    # Extract text from Responses API output (may contain web_search + message items)
+    output_text = ""
+    for item in response.output:
+        if hasattr(item, "content"):
+            for block in item.content:
+                if hasattr(block, "text"):
+                    output_text += block.text
+        elif hasattr(item, "text"):
+            output_text += item.text
+
+    data = json.loads(output_text)
 
     if data.get("ambiguous"):
         note = data.get("ambiguity_note", "multiple matches found")

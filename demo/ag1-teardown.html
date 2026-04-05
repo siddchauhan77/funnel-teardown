@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FunnelTeardown — AG1 (Athletic Greens)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        background: '#0C0E17',
+        primaryColor: '#13151F',
+        primaryTextColor: '#F1F5F9',
+        lineColor: '#334155',
+        edgeLabelBackground: '#13151F',
+        secondaryColor: '#1E2333',
+        tertiaryColor: '#1E2333',
+        fontSize: '13px'
+      },
+      flowchart: { curve: 'basis', useMaxWidth: true }
+    });
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0C0E17;
+      --surface: #13151F;
+      --border: #1E2333;
+      --border-strong: #2E3347;
+      --text: #F1F5F9;
+      --text-secondary: #94A3B8;
+      --text-muted: #4B5563;
+      --accent: #3B82F6;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* Sticky header */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(12,14,23,0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .topbar-logo {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .topbar-divider {
+      width: 1px;
+      height: 20px;
+      background: var(--border-strong);
+    }
+
+    .topbar-brand {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .pill-cost {
+      background: #22C55E22;
+      color: #22C55E;
+      border: 1px solid #22C55E33;
+    }
+
+    .pill-time {
+      background: var(--surface);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+
+    /* Nav tabs */
+    .section-nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .section-nav::-webkit-scrollbar { display: none; }
+
+    .nav-tab {
+      padding: 12px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-decoration: none;
+      white-space: nowrap;
+      border-bottom: 2px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .nav-tab:hover { color: var(--text-secondary); }
+
+    /* Main layout */
+    .main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 24px 80px;
+    }
+
+    /* Hero stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 40px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* Section headers */
+    .section {
+      margin-bottom: 48px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      background: var(--accent)22;
+      border: 1px solid var(--accent)44;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .section-count {
+      font-size: 12px;
+      color: var(--text-muted);
+      background: var(--border);
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+
+    .section-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    /* Brand card */
+    .brand-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .brand-name {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .brand-website {
+      color: var(--accent);
+      font-size: 13px;
+      text-decoration: none;
+    }
+    .brand-website:hover { text-decoration: underline; }
+
+    .brand-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .brand-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .brand-row-label {
+      color: var(--text-muted);
+      font-size: 13px;
+      min-width: 100px;
+      flex-shrink: 0;
+    }
+
+    .brand-row-value {
+      color: var(--text-secondary);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    /* Mermaid container */
+    .mermaid-wrap {
+      background: #0C0E17;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      overflow-x: auto;
+    }
+
+    /* Run details table */
+    .run-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .run-table th {
+      background: #1E2333;
+      padding: 10px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    a { color: var(--accent); }
+
+    @media (max-width: 640px) {
+      .topbar-right .pill-time { display: none; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sticky top bar -->
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="topbar-logo">FunnelTeardown</span>
+    <div class="topbar-divider"></div>
+    <span class="topbar-brand">AG1 (Athletic Greens)</span>
+  </div>
+  <div class="topbar-right">
+    <span class="pill pill-cost">&#36;0.1823</span>
+    <span class="pill pill-time">2026-04-05</span>
+    <span class="pill pill-time">54s</span>
+  </div>
+</div>
+
+<!-- Section nav -->
+<nav class="section-nav">
+  <a href="#brand" class="nav-tab">Brand</a>
+  <a href="#coverage" class="nav-tab">Coverage Map</a>
+  <a href="#journey" class="nav-tab">Funnel Journey</a>
+  <a href="#steps" class="nav-tab">Step Analysis</a>
+  <a href="#offers" class="nav-tab">Offers</a>
+  <a href="#questions" class="nav-tab">Open Questions</a>
+  <a href="#run" class="nav-tab">Run Details</a>
+</nav>
+
+<div class="main">
+
+  <!-- Hero stats -->
+  <div class="stats-grid" style="margin-top:32px;">
+    <div class="stat-card">
+      <div class="stat-value">8</div>
+      <div class="stat-label">Touchpoints</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">7</div>
+      <div class="stat-label">Journey Steps</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">3</div>
+      <div class="stat-label">Offers</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">5</div>
+      <div class="stat-label">Open Questions</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="font-size:20px;">$0.1823</div>
+      <div class="stat-label">Total Cost</div>
+    </div>
+  </div>
+
+  <!-- Brand -->
+  <section class="section" id="brand">
+    <div class="section-header">
+      <div class="section-icon">🏷</div>
+      <span class="section-title">Brand Overview</span>
+      <span class="section-count">high confidence</span>
+    </div>
+    <div class="brand-card">
+      <div class="brand-name">AG1 (Athletic Greens)</div>
+      <a href="https://ag1.com" target="_blank" class="brand-website">https://ag1.com</a>
+      <div class="brand-meta">
+        <div style="display:flex;gap:8px;"><span style="color:#4B5563;font-size:13px;min-width:80px;">Founder</span><span style="color:#94A3B8;font-size:13px;">Chris Ashenden</span></div>
+        <div class="brand-row">
+          <span class="brand-row-label">Description</span>
+          <span class="brand-row-value">AG1 is a daily all-in-one greens supplement combining 75 vitamins, minerals, and whole-food sourced ingredients into a single morning drink.</span>
+        </div>
+        <div class="brand-row">
+          <span class="brand-row-label">Primary ICP</span>
+          <span class="brand-row-value">Health-conscious professionals aged 25-45 who want a simple, comprehensive daily nutrition habit without managing multiple supplements.</span>
+        </div>
+        <div class="brand-row">
+          <span class="brand-row-label">Sources</span>
+          <span class="brand-row-value"><a href="https://ag1.com/about" target="_blank" style="color:#3B82F6;font-size:12px;text-decoration:none;">[1]</a> <a href="https://en.wikipedia.org/wiki/Athletic_Greens" target="_blank" style="color:#3B82F6;font-size:12px;text-decoration:none;">[2]</a></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Coverage map -->
+  <section class="section" id="coverage">
+    <div class="section-header">
+      <div class="section-icon">📡</div>
+      <span class="section-title">Awareness Coverage Map</span>
+      <span class="section-count">8 touchpoints</span>
+    </div>
+    <p class="section-desc">Which Schwartz awareness stages this brand actively reaches — gaps are opportunities.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin:16px 0;"><div style="background:rgba(100,116,139,0.15);border:1px solid #64748B44;border-radius:10px;padding:14px 16px;opacity:1;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span style="width:8px;height:8px;border-radius:50%;background:#64748B;flex-shrink:0;"></span><span style="font-size:12px;font-weight:600;color:#64748B;text-transform:uppercase;letter-spacing:0.05em;">Unaware</span></div><a href="https://youtube.com/@drinkag1" target="_blank" style="display:block;color:#94A3B8;font-size:12px;text-decoration:none;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="DrinkAG1"><span style="color:#64748B;">▸</span> DrinkAG1</a><a href="https://ag1.com/podcast" target="_blank" style="display:block;color:#94A3B8;font-size:12px;text-decoration:none;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="AG1 Podcast Sponsorships"><span style="color:#64748B;">▸</span> AG1 Podcast Sponsorships</a></div><div style="background:rgba(245,158,11,0.15);border:1px solid #F59E0B44;border-radius:10px;padding:14px 16px;opacity:1;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span style="width:8px;height:8px;border-radius:50%;background:#F59E0B;flex-shrink:0;"></span><span style="font-size:12px;font-weight:600;color:#F59E0B;text-transform:uppercase;letter-spacing:0.05em;">Problem Aware</span></div><a href="https://instagram.com/drinkag1" target="_blank" style="display:block;color:#94A3B8;font-size:12px;text-decoration:none;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="@drinkag1"><span style="color:#F59E0B;">▸</span> @drinkag1</a><a href="https://twitter.com/drinkag1" target="_blank" style="display:block;color:#94A3B8;font-size:12px;text-decoration:none;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="@DrinkAG1"><span style="color:#F59E0B;">▸</span> @DrinkAG1</a><a href="https://ag1.com/blog" target="_blank" style="display:block;color:#94A3B8;font-size:12px;text-decoration:none;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="AG1 Blog"><span style="color:#F59E0B;">▸</span> AG1 Blog</a></div><div style="background:rgba(59,130,246,0.15);border:1px solid #3B82F644;border-radius:10px;padding:14px 16px;opacity:1;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span style="width:8px;height:8px;border-radius:50%;background:#3B82F6;flex-shrink:0;"></span><span style="font-size:12px;font-weight:600;color:#3B82F6;text-transform:uppercase;letter-spacing:0.05em;">Solution Aware</span></div><a href="https://ag1.com/subscribe" target="_blank" style="display:block;color:#94A3B8;font-size:12px;text-decoration:none;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="AG1 Email List"><span style="color:#3B82F6;">▸</span> AG1 Email List</a></div><div style="background:rgba(139,92,246,0.15);border:1px solid #8B5CF644;border-radius:10px;padding:14px 16px;opacity:1;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span style="width:8px;height:8px;border-radius:50%;background:#8B5CF6;flex-shrink:0;"></span><span style="font-size:12px;font-weight:600;color:#8B5CF6;text-transform:uppercase;letter-spacing:0.05em;">Product Aware</span></div><a href="https://ag1.com" target="_blank" style="display:block;color:#94A3B8;font-size:12px;text-decoration:none;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="Google/Meta Ads"><span style="color:#8B5CF6;">▸</span> Google/Meta Ads</a></div><div style="background:rgba(16,185,129,0.15);border:1px solid #10B98144;border-radius:10px;padding:14px 16px;opacity:0.4;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span style="width:8px;height:8px;border-radius:50%;background:#10B981;flex-shrink:0;"></span><span style="font-size:12px;font-weight:600;color:#10B981;text-transform:uppercase;letter-spacing:0.05em;">Most Aware</span></div><span style="color:#374151;font-size:12px;">No touchpoint mapped</span></div><div style="background:rgba(5,150,105,0.15);border:1px solid #05966944;border-radius:10px;padding:14px 16px;opacity:1;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span style="width:8px;height:8px;border-radius:50%;background:#059669;flex-shrink:0;"></span><span style="font-size:12px;font-weight:600;color:#059669;text-transform:uppercase;letter-spacing:0.05em;">Customer</span></div><a href="https://ag1.com/account" target="_blank" style="display:block;color:#94A3B8;font-size:12px;text-decoration:none;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="AG1 Member Portal"><span style="color:#059669;">▸</span> AG1 Member Portal</a></div><div style="background:rgba(236,72,153,0.15);border:1px solid #EC489944;border-radius:10px;padding:14px 16px;opacity:0.4;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span style="width:8px;height:8px;border-radius:50%;background:#EC4899;flex-shrink:0;"></span><span style="font-size:12px;font-weight:600;color:#EC4899;text-transform:uppercase;letter-spacing:0.05em;">Advocate</span></div><span style="color:#374151;font-size:12px;">No touchpoint mapped</span></div></div>
+  </section>
+
+  <!-- Journey diagram -->
+  <section class="section" id="journey">
+    <div class="section-header">
+      <div class="section-icon">⟶</div>
+      <span class="section-title">Funnel Journey Diagram</span>
+    </div>
+    <p class="section-desc">Stranger → Advocate pathway. Solid border = observed. Dashed = inferred.</p>
+    <div class="mermaid-wrap">
+      <div class="mermaid">flowchart LR
+    step_1["Podcast mid-roll — 'I've been drinking AG1 for 3 years'\nUnaware"]
+    step_2["YouTube ads — 'The one thing every expert recommends'\nProblem Aware"]
+    step_3["AG1 homepage — subscription CTA + free shaker\nMost Aware"]
+    step_4["Checkout — one-time vs subscription toggle\nMost Aware"]
+    step_5["Email nurture — 5-day habit formation sequence\nSolution Aware ◦"]
+    step_6["Customer onboarding — 30-day results program\nCustomer ◦"]
+    step_7["Referral — 'Give a friend a free month'\nAdvocate ◦"]
+    step_1 --> step_2
+    step_2 --> step_3
+    step_3 --> step_4
+    step_3 --> step_5
+    step_4 --> step_6
+    step_5 --> step_4
+    step_6 --> step_7
+    style step_1 fill:#64748B33,stroke:#64748B,stroke-width:2px,color:#F1F5F9
+    style step_2 fill:#F59E0B33,stroke:#F59E0B,stroke-width:2px,color:#F1F5F9
+    style step_3 fill:#10B98133,stroke:#10B981,stroke-width:2px,color:#F1F5F9
+    style step_4 fill:#10B98133,stroke:#10B981,stroke-width:2px,color:#F1F5F9
+    style step_5 fill:#3B82F633,stroke:#3B82F6,stroke-width:2px,color:#F1F5F9
+    style step_6 fill:#05966933,stroke:#059669,stroke-width:2px,color:#F1F5F9
+    style step_7 fill:#EC489933,stroke:#EC4899,stroke-width:2px,color:#F1F5F9</div>
+    </div>
+  </section>
+
+  <!-- Step analysis -->
+  <section class="section" id="steps">
+    <div class="section-header">
+      <div class="section-icon">🔍</div>
+      <span class="section-title">Journey Step Analysis</span>
+      <span class="section-count">7 steps</span>
+    </div>
+    <p class="section-desc">Bustamante-style dual-lens review — what's working, what's missing — per funnel step.</p>
+    
+<div style="background:#13151F;border:1px solid #1E2333;border-radius:12px;
+     overflow:hidden;margin-bottom:16px;">
+  <div style="background:rgba(100,116,139,0.15);border-bottom:1px solid #64748B33;padding:16px 20px;
+       display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="width:32px;height:32px;border-radius:8px;background:#64748B22;border:1px solid #64748B44;
+           display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">
+        ▶
+      </div>
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span style="font-size:11px;font-weight:600;letter-spacing:0.08em;
+               text-transform:uppercase;color:#64748B;">Unaware</span>
+          <span style="color:#374151;font-size:11px;">·</span>
+          <span style="font-size:11px;color:#64748B;">content</span>
+        </div>
+        <h3 style="margin:4px 0 0;font-size:15px;font-weight:600;color:#F1F5F9;line-height:1.3;">
+          Podcast mid-roll — 'I've been drinking AG1 for 3 years'
+        </h3>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0;">
+      <span style="font-size:11px;font-weight:500;color:#22C55E;background:#22C55E22;padding:2px 8px;border-radius:20px;">Observed</span>
+      <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;color:#22C55E;background:#22C55E22;padding:2px 8px;border-radius:20px;"><span style="width:5px;height:5px;border-radius:50%;background:#22C55E;display:inline-block;"></span>high confidence</span>
+    </div>
+  </div>
+
+  <div style="padding:16px 20px;">
+    <p style="color:#94A3B8;font-size:14px;margin:0 0 16px;line-height:1.6;">Host-read sponsorships on health, fitness, and productivity podcasts. The host shares personal use story, making it feel like a warm recommendation rather than an ad.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div style="background:#0C1A0F;border:1px solid #166534;border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:600;color:#22C55E;margin-bottom:10px;
+             display:flex;align-items:center;gap:6px;">
+          <span style="font-size:14px;">✓</span> What's Working
+        </div>
+        <ul style="margin:0;padding-left:16px;color:#D1FAE5;font-size:13px;line-height:1.6;">
+          <li style="margin-bottom:6px;padding-left:4px;">Host-read format has 8-12x higher conversion than display ads</li><li style="margin-bottom:6px;padding-left:4px;">Personal testimonial removes 'is this a real product?' skepticism</li><li style="margin-bottom:6px;padding-left:4px;">Targeting podcast audiences who already value self-optimization</li>
+        </ul>
+      </div>
+      <div style="background:#1A0E06;border:1px solid #92400E;border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:600;color:#F59E0B;margin-bottom:10px;
+             display:flex;align-items:center;gap:6px;">
+          <span style="font-size:14px;">⚡</span> What's Missing
+        </div>
+        <ul style="margin:0;padding-left:16px;color:#FDE68A;font-size:13px;line-height:1.6;">
+          <li style="margin-bottom:6px;padding-left:4px;">No dedicated landing page per podcast — everyone goes to ag1.com</li><li style="margin-bottom:6px;padding-left:4px;">Missed opportunity to capture email before pushing to purchase</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;
+         flex-wrap:wrap;gap:8px;">
+      <div style="font-size:12px;color:#4B5563;">
+        Exits to: <code style="background:#1E2333;padding:1px 5px;border-radius:3px;font-size:11px;color:#94A3B8;">step_2</code>
+      </div>
+      <div style="display:flex;gap:6px;"><a href="https://ag1.com" target="_blank" style="color:#3B82F6;font-size:11px;text-decoration:none;padding:2px 6px;background:#3B82F611;border-radius:4px;">source 1</a></div>
+    </div>
+  </div>
+</div>
+
+<div style="background:#13151F;border:1px solid #1E2333;border-radius:12px;
+     overflow:hidden;margin-bottom:16px;">
+  <div style="background:rgba(245,158,11,0.15);border-bottom:1px solid #F59E0B33;padding:16px 20px;
+       display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="width:32px;height:32px;border-radius:8px;background:#F59E0B22;border:1px solid #F59E0B44;
+           display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">
+        ▶
+      </div>
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span style="font-size:11px;font-weight:600;letter-spacing:0.08em;
+               text-transform:uppercase;color:#F59E0B;">Problem Aware</span>
+          <span style="color:#374151;font-size:11px;">·</span>
+          <span style="font-size:11px;color:#64748B;">content</span>
+        </div>
+        <h3 style="margin:4px 0 0;font-size:15px;font-weight:600;color:#F1F5F9;line-height:1.3;">
+          YouTube ads — 'The one thing every expert recommends'
+        </h3>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0;">
+      <span style="font-size:11px;font-weight:500;color:#22C55E;background:#22C55E22;padding:2px 8px;border-radius:20px;">Observed</span>
+      <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;color:#22C55E;background:#22C55E22;padding:2px 8px;border-radius:20px;"><span style="width:5px;height:5px;border-radius:50%;background:#22C55E;display:inline-block;"></span>high confidence</span>
+    </div>
+  </div>
+
+  <div style="padding:16px 20px;">
+    <p style="color:#94A3B8;font-size:14px;margin:0 0 16px;line-height:1.6;">Pre-roll YouTube ads featuring social proof from health experts and athletes. Often highlights the '75 ingredients in one scoop' angle to differentiate from protein powder.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div style="background:#0C1A0F;border:1px solid #166534;border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:600;color:#22C55E;margin-bottom:10px;
+             display:flex;align-items:center;gap:6px;">
+          <span style="font-size:14px;">✓</span> What's Working
+        </div>
+        <ul style="margin:0;padding-left:16px;color:#D1FAE5;font-size:13px;line-height:1.6;">
+          <li style="margin-bottom:6px;padding-left:4px;">Expert social proof (doctors, athletes) addresses credibility gap fast</li><li style="margin-bottom:6px;padding-left:4px;">75-ingredient angle creates clear differentiation from whey protein</li><li style="margin-bottom:6px;padding-left:4px;">Skippable format means only high-intent viewers reach the CTA</li>
+        </ul>
+      </div>
+      <div style="background:#1A0E06;border:1px solid #92400E;border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:600;color:#F59E0B;margin-bottom:10px;
+             display:flex;align-items:center;gap:6px;">
+          <span style="font-size:14px;">⚡</span> What's Missing
+        </div>
+        <ul style="margin:0;padding-left:16px;color:#FDE68A;font-size:13px;line-height:1.6;">
+          <li style="margin-bottom:6px;padding-left:4px;">No retargeting pixel sequence for people who watched 30%+ but didn't click</li><li style="margin-bottom:6px;padding-left:4px;">Hook leads with product before establishing the problem — leaves unaware audience behind</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;
+         flex-wrap:wrap;gap:8px;">
+      <div style="font-size:12px;color:#4B5563;">
+        Exits to: <code style="background:#1E2333;padding:1px 5px;border-radius:3px;font-size:11px;color:#94A3B8;">step_3</code>
+      </div>
+      <div style="display:flex;gap:6px;"><a href="https://youtube.com/@drinkag1" target="_blank" style="color:#3B82F6;font-size:11px;text-decoration:none;padding:2px 6px;background:#3B82F611;border-radius:4px;">source 1</a></div>
+    </div>
+  </div>
+</div>
+
+<div style="background:#13151F;border:1px solid #1E2333;border-radius:12px;
+     overflow:hidden;margin-bottom:16px;">
+  <div style="background:rgba(16,185,129,0.15);border-bottom:1px solid #10B98133;padding:16px 20px;
+       display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="width:32px;height:32px;border-radius:8px;background:#10B98122;border:1px solid #10B98144;
+           display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">
+        ⬛
+      </div>
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span style="font-size:11px;font-weight:600;letter-spacing:0.08em;
+               text-transform:uppercase;color:#10B981;">Most Aware</span>
+          <span style="color:#374151;font-size:11px;">·</span>
+          <span style="font-size:11px;color:#64748B;">landing page</span>
+        </div>
+        <h3 style="margin:4px 0 0;font-size:15px;font-weight:600;color:#F1F5F9;line-height:1.3;">
+          AG1 homepage — subscription CTA + free shaker
+        </h3>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0;">
+      <span style="font-size:11px;font-weight:500;color:#22C55E;background:#22C55E22;padding:2px 8px;border-radius:20px;">Observed</span>
+      <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;color:#22C55E;background:#22C55E22;padding:2px 8px;border-radius:20px;"><span style="width:5px;height:5px;border-radius:50%;background:#22C55E;display:inline-block;"></span>high confidence</span>
+    </div>
+  </div>
+
+  <div style="padding:16px 20px;">
+    <p style="color:#94A3B8;font-size:14px;margin:0 0 16px;line-height:1.6;">Homepage functions as both a landing page and brand hub. Primary CTA is subscribe & save with a free Welcome Kit (shaker, travel packs) as a conversion sweetener.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div style="background:#0C1A0F;border:1px solid #166534;border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:600;color:#22C55E;margin-bottom:10px;
+             display:flex;align-items:center;gap:6px;">
+          <span style="font-size:14px;">✓</span> What's Working
+        </div>
+        <ul style="margin:0;padding-left:16px;color:#D1FAE5;font-size:13px;line-height:1.6;">
+          <li style="margin-bottom:6px;padding-left:4px;">Free Welcome Kit reduces friction — buyer feels they're getting more than they pay for</li><li style="margin-bottom:6px;padding-left:4px;">90-day money-back guarantee removes purchase risk entirely</li><li style="margin-bottom:6px;padding-left:4px;">Subscribe & save framing anchors the subscription as the smart choice</li>
+        </ul>
+      </div>
+      <div style="background:#1A0E06;border:1px solid #92400E;border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:600;color:#F59E0B;margin-bottom:10px;
+             display:flex;align-items:center;gap:6px;">
+          <span style="font-size:14px;">⚡</span> What's Missing
+        </div>
+        <ul style="margin:0;padding-left:16px;color:#FDE68A;font-size:13px;line-height:1.6;">
+          <li style="margin-bottom:6px;padding-left:4px;">No lead magnet for the 85% who aren't ready to buy today</li><li style="margin-bottom:6px;padding-left:4px;">No quiz/assessment funnel to segment by health goal before presenting the offer</li><li style="margin-bottom:6px;padding-left:4px;">Social proof (review count) is buried — not in the hero</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;
+         flex-wrap:wrap;gap:8px;">
+      <div style="font-size:12px;color:#4B5563;">
+        Exits to: <code style="background:#1E2333;padding:1px 5px;border-radius:3px;font-size:11px;color:#94A3B8;">step_4</code>, <code style="background:#1E2333;padding:1px 5px;border-radius:3px;font-size:11px;color:#94A3B8;">step_5</code>
+      </div>
+      <div style="display:flex;gap:6px;"><a href="https://ag1.com" target="_blank" style="color:#3B82F6;font-size:11px;text-decoration:none;padding:2px 6px;background:#3B82F611;border-radius:4px;">source 1</a></div>
+    </div>
+  </div>
+</div>
+
+<div style="background:#13151F;border:1px solid #1E2333;border-radius:12px;
+     overflow:hidden;margin-bottom:16px;">
+  <div style="background:rgba(16,185,129,0.15);border-bottom:1px solid #10B98133;padding:16px 20px;
+       display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="width:32px;height:32px;border-radius:8px;background:#10B98122;border:1px solid #10B98144;
+           display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">
+        💳
+      </div>
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span style="font-size:11px;font-weight:600;letter-spacing:0.08em;
+               text-transform:uppercase;color:#10B981;">Most Aware</span>
+          <span style="color:#374151;font-size:11px;">·</span>
+          <span style="font-size:11px;color:#64748B;">checkout</span>
+        </div>
+        <h3 style="margin:4px 0 0;font-size:15px;font-weight:600;color:#F1F5F9;line-height:1.3;">
+          Checkout — one-time vs subscription toggle
+        </h3>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0;">
+      <span style="font-size:11px;font-weight:500;color:#22C55E;background:#22C55E22;padding:2px 8px;border-radius:20px;">Observed</span>
+      <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;color:#22C55E;background:#22C55E22;padding:2px 8px;border-radius:20px;"><span style="width:5px;height:5px;border-radius:50%;background:#22C55E;display:inline-block;"></span>high confidence</span>
+    </div>
+  </div>
+
+  <div style="padding:16px 20px;">
+    <p style="color:#94A3B8;font-size:14px;margin:0 0 16px;line-height:1.6;">Two-option checkout: one-time purchase or subscribe & save (saves ~18%). The toggle mechanic nudges buyers toward recurring revenue.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div style="background:#0C1A0F;border:1px solid #166534;border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:600;color:#22C55E;margin-bottom:10px;
+             display:flex;align-items:center;gap:6px;">
+          <span style="font-size:14px;">✓</span> What's Working
+        </div>
+        <ul style="margin:0;padding-left:16px;color:#D1FAE5;font-size:13px;line-height:1.6;">
+          <li style="margin-bottom:6px;padding-left:4px;">Side-by-side pricing makes subscribe & save the obvious rational choice</li><li style="margin-bottom:6px;padding-left:4px;">Single-page checkout minimizes drop-off from multi-step flows</li>
+        </ul>
+      </div>
+      <div style="background:#1A0E06;border:1px solid #92400E;border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:600;color:#F59E0B;margin-bottom:10px;
+             display:flex;align-items:center;gap:6px;">
+          <span style="font-size:14px;">⚡</span> What's Missing
+        </div>
+        <ul style="margin:0;padding-left:16px;color:#FDE68A;font-size:13px;line-height:1.6;">
+          <li style="margin-bottom:6px;padding-left:4px;">No urgency mechanism (countdown, limited stock) for fence-sitters</li><li style="margin-bottom:6px;padding-left:4px;">No bump offer at checkout (e.g., shaker upgrade, extra travel packs)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;
+         flex-wrap:wrap;gap:8px;">
+      <div style="font-size:12px;color:#4B5563;">
+        Exits to: <code style="background:#1E2333;padding:1px 5px;border-radius:3px;font-size:11px;color:#94A3B8;">step_6</code>
+      </div>
+      <div style="display:flex;gap:6px;"><a href="https://ag1.com/checkout" target="_blank" style="color:#3B82F6;font-size:11px;text-decoration:none;padding:2px 6px;background:#3B82F611;border-radius:4px;">source 1</a></div>
+    </div>
+  </div>
+</div>
+
+<div style="background:#13151F;border:1px solid #1E2333;border-radius:12px;
+     overflow:hidden;margin-bottom:16px;">
+  <div style="background:rgba(59,130,246,0.15);border-bottom:1px solid #3B82F633;padding:16px 20px;
+       display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="width:32px;height:32px;border-radius:8px;background:#3B82F622;border:1px solid #3B82F644;
+           display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">
+        ✉
+      </div>
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span style="font-size:11px;font-weight:600;letter-spacing:0.08em;
+               text-transform:uppercase;color:#3B82F6;">Solution Aware</span>
+          <span style="color:#374151;font-size:11px;">·</span>
+          <span style="font-size:11px;color:#64748B;">email sequence</span>
+        </div>
+        <h3 style="margin:4px 0 0;font-size:15px;font-weight:600;color:#F1F5F9;line-height:1.3;">
+          Email nurture — 5-day habit formation sequence
+        </h3>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0;">
+      <span style="font-size:11px;font-weight:500;color:#F59E0B;background:#F59E0B22;padding:2px 8px;border-radius:20px;">Inferred</span>
+      <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;color:#F59E0B;background:#F59E0B22;padding:2px 8px;border-radius:20px;"><span style="width:5px;height:5px;border-radius:50%;background:#F59E0B;display:inline-block;"></span>medium confidence</span>
+    </div>
+  </div>
+
+  <div style="padding:16px 20px;">
+    <p style="color:#94A3B8;font-size:14px;margin:0 0 16px;line-height:1.6;">Post-opt-in email sequence focused on habit stacking AG1 with morning routines. Sends recipes, science explainers, and testimonials before making a direct sales push.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div style="background:#0C1A0F;border:1px solid #166534;border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:600;color:#22C55E;margin-bottom:10px;
+             display:flex;align-items:center;gap:6px;">
+          <span style="font-size:14px;">✓</span> What's Working
+        </div>
+        <ul style="margin:0;padding-left:16px;color:#D1FAE5;font-size:13px;line-height:1.6;">
+          <li style="margin-bottom:6px;padding-left:4px;">Habit-stacking content (AG1 + morning routine) increases perceived value</li><li style="margin-bottom:6px;padding-left:4px;">Science-backed content earns credibility with skeptical health consumers</li>
+        </ul>
+      </div>
+      <div style="background:#1A0E06;border:1px solid #92400E;border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:600;color:#F59E0B;margin-bottom:10px;
+             display:flex;align-items:center;gap:6px;">
+          <span style="font-size:14px;">⚡</span> What's Missing
+        </div>
+        <ul style="margin:0;padding-left:16px;color:#FDE68A;font-size:13px;line-height:1.6;">
+          <li style="margin-bottom:6px;padding-left:4px;">Sequence likely doesn't segment by health goal (energy, gut health, immunity)</li><li style="margin-bottom:6px;padding-left:4px;">No behavioral trigger emails for people who visited checkout but didn't buy</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;
+         flex-wrap:wrap;gap:8px;">
+      <div style="font-size:12px;color:#4B5563;">
+        Exits to: <code style="background:#1E2333;padding:1px 5px;border-radius:3px;font-size:11px;color:#94A3B8;">step_4</code>
+      </div>
+      <div style="display:flex;gap:6px;"></div>
+    </div>
+  </div>
+</div>
+
+<div style="background:#13151F;border:1px solid #1E2333;border-radius:12px;
+     overflow:hidden;margin-bottom:16px;">
+  <div style="background:rgba(5,150,105,0.15);border-bottom:1px solid #05966933;padding:16px 20px;
+       display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="width:32px;height:32px;border-radius:8px;background:#05966922;border:1px solid #05966944;
+           display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">
+        🚀
+      </div>
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span style="font-size:11px;font-weight:600;letter-spacing:0.08em;
+               text-transform:uppercase;color:#059669;">Customer</span>
+          <span style="color:#374151;font-size:11px;">·</span>
+          <span style="font-size:11px;color:#64748B;">onboarding</span>
+        </div>
+        <h3 style="margin:4px 0 0;font-size:15px;font-weight:600;color:#F1F5F9;line-height:1.3;">
+          Customer onboarding — 30-day results program
+        </h3>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0;">
+      <span style="font-size:11px;font-weight:500;color:#F59E0B;background:#F59E0B22;padding:2px 8px;border-radius:20px;">Inferred</span>
+      <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;color:#F59E0B;background:#F59E0B22;padding:2px 8px;border-radius:20px;"><span style="width:5px;height:5px;border-radius:50%;background:#F59E0B;display:inline-block;"></span>medium confidence</span>
+    </div>
+  </div>
+
+  <div style="padding:16px 20px;">
+    <p style="color:#94A3B8;font-size:14px;margin:0 0 16px;line-height:1.6;">Post-purchase email + member portal content that guides new subscribers through their first 30 days. Focus on building the morning habit to reduce churn.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div style="background:#0C1A0F;border:1px solid #166534;border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:600;color:#22C55E;margin-bottom:10px;
+             display:flex;align-items:center;gap:6px;">
+          <span style="font-size:14px;">✓</span> What's Working
+        </div>
+        <ul style="margin:0;padding-left:16px;color:#D1FAE5;font-size:13px;line-height:1.6;">
+          <li style="margin-bottom:6px;padding-left:4px;">30-day program creates an identity shift ('I'm an AG1 person')</li><li style="margin-bottom:6px;padding-left:4px;">Progress framing reduces early cancellations from buyers with slow perceived results</li>
+        </ul>
+      </div>
+      <div style="background:#1A0E06;border:1px solid #92400E;border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:600;color:#F59E0B;margin-bottom:10px;
+             display:flex;align-items:center;gap:6px;">
+          <span style="font-size:14px;">⚡</span> What's Missing
+        </div>
+        <ul style="margin:0;padding-left:16px;color:#FDE68A;font-size:13px;line-height:1.6;">
+          <li style="margin-bottom:6px;padding-left:4px;">No community element — subscribers are isolated, not connected to each other</li><li style="margin-bottom:6px;padding-left:4px;">Win-back sequence for churned subscribers is likely weak or absent</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;
+         flex-wrap:wrap;gap:8px;">
+      <div style="font-size:12px;color:#4B5563;">
+        Exits to: <code style="background:#1E2333;padding:1px 5px;border-radius:3px;font-size:11px;color:#94A3B8;">step_7</code>
+      </div>
+      <div style="display:flex;gap:6px;"></div>
+    </div>
+  </div>
+</div>
+
+<div style="background:#13151F;border:1px solid #1E2333;border-radius:12px;
+     overflow:hidden;margin-bottom:16px;">
+  <div style="background:rgba(236,72,153,0.15);border-bottom:1px solid #EC489933;padding:16px 20px;
+       display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="width:32px;height:32px;border-radius:8px;background:#EC489922;border:1px solid #EC489944;
+           display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">
+        ↗
+      </div>
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span style="font-size:11px;font-weight:600;letter-spacing:0.08em;
+               text-transform:uppercase;color:#EC4899;">Advocate</span>
+          <span style="color:#374151;font-size:11px;">·</span>
+          <span style="font-size:11px;color:#64748B;">referral</span>
+        </div>
+        <h3 style="margin:4px 0 0;font-size:15px;font-weight:600;color:#F1F5F9;line-height:1.3;">
+          Referral — 'Give a friend a free month'
+        </h3>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0;">
+      <span style="font-size:11px;font-weight:500;color:#F59E0B;background:#F59E0B22;padding:2px 8px;border-radius:20px;">Inferred</span>
+      <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;color:#EF4444;background:#EF444422;padding:2px 8px;border-radius:20px;"><span style="width:5px;height:5px;border-radius:50%;background:#EF4444;display:inline-block;"></span>low confidence</span>
+    </div>
+  </div>
+
+  <div style="padding:16px 20px;">
+    <p style="color:#94A3B8;font-size:14px;margin:0 0 16px;line-height:1.6;">Referral program that rewards both referrer and new customer. AG1 leans on the 'I introduced my friend to this' social identity that health-optimizers enjoy.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div style="background:#0C1A0F;border:1px solid #166534;border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:600;color:#22C55E;margin-bottom:10px;
+             display:flex;align-items:center;gap:6px;">
+          <span style="font-size:14px;">✓</span> What's Working
+        </div>
+        <ul style="margin:0;padding-left:16px;color:#D1FAE5;font-size:13px;line-height:1.6;">
+          <li style="margin-bottom:6px;padding-left:4px;">Two-sided incentive removes guilt from 'selling' to friends</li><li style="margin-bottom:6px;padding-left:4px;">Health-optimizer identity makes sharing feel like a gift, not spam</li>
+        </ul>
+      </div>
+      <div style="background:#1A0E06;border:1px solid #92400E;border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:600;color:#F59E0B;margin-bottom:10px;
+             display:flex;align-items:center;gap:6px;">
+          <span style="font-size:14px;">⚡</span> What's Missing
+        </div>
+        <ul style="margin:0;padding-left:16px;color:#FDE68A;font-size:13px;line-height:1.6;">
+          <li style="margin-bottom:6px;padding-left:4px;">Referral program is underpromotoed — buried in account portal, not actively pushed via email</li><li style="margin-bottom:6px;padding-left:4px;">No tiered rewards for power referrers</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;
+         flex-wrap:wrap;gap:8px;">
+      <div style="font-size:12px;color:#4B5563;">
+        Exits to: —
+      </div>
+      <div style="display:flex;gap:6px;"></div>
+    </div>
+  </div>
+</div>
+  </section>
+
+  <!-- Offers -->
+  <section class="section" id="offers">
+    <div class="section-header">
+      <div class="section-icon">💰</div>
+      <span class="section-title">Offers</span>
+      <span class="section-count">3 identified</span>
+    </div>
+    
+<div style="background:#13151F;border:1px solid #1E2333;border-radius:12px;
+     padding:20px;display:flex;justify-content:space-between;align-items:flex-start;
+     gap:16px;flex-wrap:wrap;margin-bottom:12px;">
+  <div style="flex:1;min-width:200px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+      <span style="font-size:13px;font-weight:700;color:#F1F5F9;">AG1 Subscription</span>
+      <span style="font-size:11px;color:#64748B;background:#1E2333;padding:2px 8px;
+           border-radius:4px;">subscription</span>
+      <span style="font-size:11px;font-weight:500;color:#22C55E;background:#22C55E22;padding:2px 8px;border-radius:20px;">Observed</span>
+    </div>
+    <p style="margin:0 0 8px;color:#94A3B8;font-size:13px;font-style:italic;line-height:1.5;">
+      "The all-in-one daily nutrition habit — 75 ingredients, one scoop"
+    </p>
+    <div style="font-size:12px;color:#4B5563;">
+      Connected to: <code style="background:#1E2333;padding:1px 5px;border-radius:3px;
+      color:#94A3B8;">step_3</code>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
+    <div style="font-size:24px;font-weight:700;color:#F1F5F9;">$79</div>
+    <span style="font-size:11px;font-weight:600;color:#10B981;background:rgba(16,185,129,0.15);
+         padding:4px 10px;border-radius:20px;border:1px solid #10B98133;">Most Aware</span>
+    <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;color:#22C55E;background:#22C55E22;padding:2px 8px;border-radius:20px;"><span style="width:5px;height:5px;border-radius:50%;background:#22C55E;display:inline-block;"></span>high confidence</span>
+  </div>
+</div>
+
+<div style="background:#13151F;border:1px solid #1E2333;border-radius:12px;
+     padding:20px;display:flex;justify-content:space-between;align-items:flex-start;
+     gap:16px;flex-wrap:wrap;margin-bottom:12px;">
+  <div style="flex:1;min-width:200px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+      <span style="font-size:13px;font-weight:700;color:#F1F5F9;">AG1 One-Time Purchase</span>
+      <span style="font-size:11px;color:#64748B;background:#1E2333;padding:2px 8px;
+           border-radius:4px;">core product</span>
+      <span style="font-size:11px;font-weight:500;color:#22C55E;background:#22C55E22;padding:2px 8px;border-radius:20px;">Observed</span>
+    </div>
+    <p style="margin:0 0 8px;color:#94A3B8;font-size:13px;font-style:italic;line-height:1.5;">
+      "Try AG1 risk-free with a 90-day money-back guarantee"
+    </p>
+    <div style="font-size:12px;color:#4B5563;">
+      Connected to: <code style="background:#1E2333;padding:1px 5px;border-radius:3px;
+      color:#94A3B8;">step_4</code>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
+    <div style="font-size:24px;font-weight:700;color:#F1F5F9;">$99</div>
+    <span style="font-size:11px;font-weight:600;color:#8B5CF6;background:rgba(139,92,246,0.15);
+         padding:4px 10px;border-radius:20px;border:1px solid #8B5CF633;">Product Aware</span>
+    <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;color:#22C55E;background:#22C55E22;padding:2px 8px;border-radius:20px;"><span style="width:5px;height:5px;border-radius:50%;background:#22C55E;display:inline-block;"></span>high confidence</span>
+  </div>
+</div>
+
+<div style="background:#13151F;border:1px solid #1E2333;border-radius:12px;
+     padding:20px;display:flex;justify-content:space-between;align-items:flex-start;
+     gap:16px;flex-wrap:wrap;margin-bottom:12px;">
+  <div style="flex:1;min-width:200px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+      <span style="font-size:13px;font-weight:700;color:#F1F5F9;">Free Welcome Kit</span>
+      <span style="font-size:11px;color:#64748B;background:#1E2333;padding:2px 8px;
+           border-radius:4px;">lead magnet</span>
+      <span style="font-size:11px;font-weight:500;color:#22C55E;background:#22C55E22;padding:2px 8px;border-radius:20px;">Observed</span>
+    </div>
+    <p style="margin:0 0 8px;color:#94A3B8;font-size:13px;font-style:italic;line-height:1.5;">
+      "Get a free shaker + 5 travel packs with your first order"
+    </p>
+    <div style="font-size:12px;color:#4B5563;">
+      Connected to: <code style="background:#1E2333;padding:1px 5px;border-radius:3px;
+      color:#94A3B8;">step_3</code>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
+    <div style="font-size:24px;font-weight:700;color:#F1F5F9;">—</div>
+    <span style="font-size:11px;font-weight:600;color:#10B981;background:rgba(16,185,129,0.15);
+         padding:4px 10px;border-radius:20px;border:1px solid #10B98133;">Most Aware</span>
+    <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;color:#22C55E;background:#22C55E22;padding:2px 8px;border-radius:20px;"><span style="width:5px;height:5px;border-radius:50%;background:#22C55E;display:inline-block;"></span>high confidence</span>
+  </div>
+</div>
+  </section>
+
+  <!-- Open questions -->
+  <section class="section" id="questions">
+    <div class="section-header">
+      <div class="section-icon">❓</div>
+      <span class="section-title">Open Questions</span>
+      <span class="section-count">5 unanswered</span>
+    </div>
+    <p class="section-desc">What couldn't be determined from public data alone — private or ambiguous signals.</p>
+    <ol style="padding-left:24px;list-style:decimal;"><li style="margin-bottom:12px;padding:14px 16px;background:#13151F;border:1px solid #1E2333;border-left:3px solid #3B82F6;border-radius:0 8px 8px 0;color:#94A3B8;font-size:14px;line-height:1.6;">Does AG1 run Facebook/Instagram retargeting ads for cart abandoners? The homepage has a Meta pixel but no public evidence of a full remarketing sequence.</li><li style="margin-bottom:12px;padding:14px 16px;background:#13151F;border:1px solid #1E2333;border-left:3px solid #3B82F6;border-radius:0 8px 8px 0;color:#94A3B8;font-size:14px;line-height:1.6;">What is the email nurture sequence between opt-in and first purchase? The content and length of this sequence would reveal a lot about their lead-to-buyer conversion strategy.</li><li style="margin-bottom:12px;padding:14px 16px;background:#13151F;border:1px solid #1E2333;border-left:3px solid #3B82F6;border-radius:0 8px 8px 0;color:#94A3B8;font-size:14px;line-height:1.6;">What is AG1's podcast sponsorship ROI threshold? Knowing their minimum subscriber count for sponsorships would reveal how they balance reach vs. audience quality.</li><li style="margin-bottom:12px;padding:14px 16px;background:#13151F;border:1px solid #1E2333;border-left:3px solid #3B82F6;border-radius:0 8px 8px 0;color:#94A3B8;font-size:14px;line-height:1.6;">Is there a quiz or assessment funnel? Several health supplement brands (Ritual, Thorne) use quiz funnels — AG1 may be testing one that isn't widely visible.</li><li style="margin-bottom:12px;padding:14px 16px;background:#13151F;border:1px solid #1E2333;border-left:3px solid #3B82F6;border-radius:0 8px 8px 0;color:#94A3B8;font-size:14px;line-height:1.6;">What does the churn win-back sequence look like? Given their subscription model, the re-engagement strategy for churned subscribers is likely a significant revenue lever.</li></ol>
+  </section>
+
+  <!-- Run details -->
+  <section class="section" id="run">
+    <div class="section-header">
+      <div class="section-icon">⚙</div>
+      <span class="section-title">Run Details</span>
+    </div>
+    <table class="run-table">
+      <thead>
+        <tr>
+          <th>Agent</th>
+          <th>Model</th>
+          <th>Cost (USD)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #1E2333;"><td style="padding:10px 16px;color:#94A3B8;font-size:13px;">brand_resolver</td><td style="padding:10px 16px;color:#64748B;font-size:12px;"><code style="background:#1E2333;padding:2px 6px;border-radius:4px;">gpt-4o-mini</code></td><td style="padding:10px 16px;color:#22C55E;font-size:13px;font-weight:500;">$0.0021</td></tr><tr style="border-bottom:1px solid #1E2333;"><td style="padding:10px 16px;color:#94A3B8;font-size:13px;">touchpoint_mapper</td><td style="padding:10px 16px;color:#64748B;font-size:12px;"><code style="background:#1E2333;padding:2px 6px;border-radius:4px;">gpt-4o-mini</code></td><td style="padding:10px 16px;color:#22C55E;font-size:13px;font-weight:500;">$0.0134</td></tr><tr style="border-bottom:1px solid #1E2333;"><td style="padding:10px 16px;color:#94A3B8;font-size:13px;">journey_mapper</td><td style="padding:10px 16px;color:#64748B;font-size:12px;"><code style="background:#1E2333;padding:2px 6px;border-radius:4px;">claude-sonnet-4-6</code></td><td style="padding:10px 16px;color:#22C55E;font-size:13px;font-weight:500;">$0.1668</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:12px;font-size:12px;color:#374151;">
+      Total: <strong style="color:#22C55E;">$0.1823</strong>
+      &nbsp;·&nbsp; Runtime: 54s
+      &nbsp;·&nbsp; Generated: 2026-04-05T14:32:11
+    </p>
+  </section>
+
+</div>
+
+<footer style="border-top:1px solid #1E2333;padding:20px 24px;text-align:center;
+     font-size:12px;color:#374151;">
+  Generated by <strong style="color:#4B5563;">FunnelTeardown AI</strong>
+  &nbsp;·&nbsp; Input: "AG1 Athletic Greens"
+  &nbsp;·&nbsp; <a href="https://github.com/siddchauhan77/funnel-teardown"
+  target="_blank" style="color:#3B82F6;text-decoration:none;">github.com/siddchauhan77/funnel-teardown</a>
+</footer>
+
+</body>
+</html>
