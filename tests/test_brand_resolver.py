@@ -7,8 +7,11 @@ from utils.cost_tracker import CostTracker
 
 def _make_openai_response(text: str, input_tokens: int = 500, output_tokens: int = 300):
     """Build a minimal mock of the OpenAI Responses API response object."""
+    mock_item = MagicMock()
+    mock_item.text = text
+    del mock_item.content  # force hasattr(item, "content") == False
     mock_response = MagicMock()
-    mock_response.output_text = text
+    mock_response.output = [mock_item]
     mock_response.usage.input_tokens = input_tokens
     mock_response.usage.output_tokens = output_tokens
     return mock_response
@@ -34,8 +37,8 @@ def test_resolve_brand_populates_state():
 
     mock_response = _make_openai_response(AG1_JSON)
 
-    with patch("agents.brand_resolver.openai_client") as mock_client:
-        mock_client.responses.create.return_value = mock_response
+    with patch("agents.brand_resolver._get_client") as mock_get_client:
+        mock_get_client.return_value.responses.create.return_value = mock_response
         resolve_brand(state, tracker)
 
     assert state.funnel_map.brand.name == "AG1"
@@ -50,8 +53,8 @@ def test_resolve_brand_records_cost():
 
     mock_response = _make_openai_response(AG1_JSON, input_tokens=800, output_tokens=400)
 
-    with patch("agents.brand_resolver.openai_client") as mock_client:
-        mock_client.responses.create.return_value = mock_response
+    with patch("agents.brand_resolver._get_client") as mock_get_client:
+        mock_get_client.return_value.responses.create.return_value = mock_response
         resolve_brand(state, tracker)
 
     cost = tracker.agent_cost("brand_resolver")
@@ -77,8 +80,8 @@ def test_resolve_brand_raises_on_ambiguous():
     """
     mock_response = _make_openai_response(ambiguous_json)
 
-    with patch("agents.brand_resolver.openai_client") as mock_client:
-        mock_client.responses.create.return_value = mock_response
+    with patch("agents.brand_resolver._get_client") as mock_get_client:
+        mock_get_client.return_value.responses.create.return_value = mock_response
         with pytest.raises(ValueError, match="ambiguous"):
             resolve_brand(state, tracker)
 
@@ -88,9 +91,9 @@ def test_resolve_brand_uses_hints():
     tracker = CostTracker()
     mock_response = _make_openai_response(AG1_JSON)
 
-    with patch("agents.brand_resolver.openai_client") as mock_client:
-        mock_client.responses.create.return_value = mock_response
+    with patch("agents.brand_resolver._get_client") as mock_get_client:
+        mock_get_client.return_value.responses.create.return_value = mock_response
         resolve_brand(state, tracker)
 
-    call_args = mock_client.responses.create.call_args
+    call_args = mock_get_client.return_value.responses.create.call_args
     assert "justinwelsh.me" in call_args.kwargs.get("input", "")
