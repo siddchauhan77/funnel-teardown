@@ -123,7 +123,15 @@ def _run_pipeline(brand: str, hints: dict, q: queue.Queue) -> None:
                "hint": "Try adding --url or --founder to disambiguate."})
         return
     except Exception as e:
-        q.put({"type": "error", "message": f"Brand resolver failed: {e}"})
+        err = str(e)
+        if "credit" in err.lower() or "billing" in err.lower():
+            q.put({"type": "error",
+                   "message": "OpenAI API credit balance is too low.",
+                   "hint": "Top up at platform.openai.com → Billing, then try again."})
+        else:
+            q.put({"type": "error",
+                   "message": "Couldn't resolve that brand — web search may have returned ambiguous results.",
+                   "hint": "Try adding a website URL (e.g. ag1.com) to help narrow it down."})
         return
 
     # ── Agent 2: Touchpoint Mapper ───────────────────────────────────────────
@@ -143,7 +151,15 @@ def _run_pipeline(brand: str, hints: dict, q: queue.Queue) -> None:
                    "cost": round(tracker.agent_cost("touchpoint_mapper"), 5),
                }})
     except Exception as e:
-        q.put({"type": "error", "message": f"Touchpoint mapper failed: {e}"})
+        err = str(e)
+        if "credit" in err.lower() or "billing" in err.lower():
+            q.put({"type": "error",
+                   "message": "OpenAI API credit balance is too low.",
+                   "hint": "Top up at platform.openai.com → Billing, then try again."})
+        else:
+            q.put({"type": "error",
+                   "message": "Touchpoint discovery failed — couldn't scrape enough channel data.",
+                   "hint": "Try again or add the website URL to help the scraper."})
         return
 
     # ── Agent 3: Journey Mapper ──────────────────────────────────────────────
@@ -159,7 +175,23 @@ def _run_pipeline(brand: str, hints: dict, q: queue.Queue) -> None:
                    "cost": round(tracker.agent_cost("journey_mapper"), 5),
                }})
     except Exception as e:
-        q.put({"type": "error", "message": f"Journey mapper failed: {e}"})
+        err = str(e)
+        if "credit balance is too low" in err or "billing" in err.lower():
+            q.put({"type": "error",
+                   "message": "Anthropic API credit balance is too low.",
+                   "hint": "Top up at console.anthropic.com → Plans & Billing, then try again."})
+        elif "401" in err or "authentication" in err.lower():
+            q.put({"type": "error",
+                   "message": "Invalid Anthropic API key.",
+                   "hint": "Check ANTHROPIC_API_KEY in your Railway environment variables."})
+        elif "rate_limit" in err.lower() or "429" in err:
+            q.put({"type": "error",
+                   "message": "Anthropic rate limit hit — too many requests.",
+                   "hint": "Wait 30 seconds and try again."})
+        else:
+            q.put({"type": "error",
+                   "message": "Journey mapping failed — Claude couldn't complete the analysis.",
+                   "hint": "Try again. If it keeps failing, the brand may have limited public data."})
         return
 
     # ── Render ───────────────────────────────────────────────────────────────
