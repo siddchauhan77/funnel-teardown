@@ -678,7 +678,7 @@
     <div class="form-card">
       <form id="analyzeForm">
         <div class="field">
-          <label for="brandInput">Brand to analyze</label>
+          <label for="brandInput">Brand to analyze <span style="color:var(--red);font-size:10px;">required</span></label>
           <input
             type="text"
             id="brandInput"
@@ -688,17 +688,21 @@
           >
         </div>
 
+        <div class="field">
+          <label for="urlInput">
+            Website URL
+            <span class="field-opt">recommended — improves brand colors &amp; accuracy</span>
+          </label>
+          <input type="text" id="urlInput" placeholder="ag1.com or justinwelsh.me">
+        </div>
+
         <button type="button" class="hints-toggle" id="hintsToggle">
           <span class="arrow">▶</span>
-          Optional hints (helps with ambiguous brand names)
+          More hints (founder name, etc.)
         </button>
         <div class="hints-fields" id="hintsFields">
-          <div class="field" style="margin-bottom:0">
-            <label for="urlInput">Website URL <span class="field-opt">optional</span></label>
-            <input type="text" id="urlInput" placeholder="justinwelsh.me">
-          </div>
-          <div class="field" style="margin-bottom:0">
-            <label for="founderInput">Founder <span class="field-opt">optional</span></label>
+          <div class="field" style="margin-bottom:0;grid-column:1/-1;">
+            <label for="founderInput">Founder <span class="field-opt">helps disambiguate personal brands</span></label>
             <input type="text" id="founderInput" placeholder="Alex Hormozi">
           </div>
         </div>
@@ -895,9 +899,9 @@
   // ── Example chips ────────────────────────────────────────────────
   function fillExample(brand, founder, url) {
     document.getElementById('brandInput').value = brand;
-    document.getElementById('founderInput').value = founder;
     document.getElementById('urlInput').value = url;
-    if (founder || url) {
+    document.getElementById('founderInput').value = founder;
+    if (founder) {
       document.getElementById('hintsToggle').classList.add('open');
       document.getElementById('hintsFields').classList.add('open');
     }
