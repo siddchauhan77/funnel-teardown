@@ -40,6 +40,9 @@ class Brand(BaseModel):
     primary_icp: str
     confidence: Confidence
     evidence: list[str]
+    # Visual branding extracted from homepage (populated by touchpoint_mapper)
+    theme_color: Optional[str] = None   # e.g. "#1DB954" from <meta name="theme-color">
+    logo_url: Optional[str] = None      # e.g. og:image URL
 
 
 class Touchpoint(BaseModel):

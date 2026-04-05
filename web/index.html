@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FunnelTeardown AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0C0E17;
+      --surface:   #13151F;
+      --surface2:  #1A1D2E;
+      --border:    #1E2333;
+      --border2:   #2A3040;
+      --text:      #F1F5F9;
+      --text2:     #94A3B8;
+      --muted:     #4B5563;
+      --accent:    #3B82F6;
+      --accent2:   #2563EB;
+      --green:     #22C55E;
+      --amber:     #F59E0B;
+      --red:       #EF4444;
+    }
+
+    /* Light mode */
+    @media (prefers-color-scheme: light) {
+      :root:not([data-theme="dark"]) {
+        --bg:        #F8FAFC;
+        --surface:   #FFFFFF;
+        --surface2:  #F1F5F9;
+        --border:    #E2E8F0;
+        --border2:   #CBD5E1;
+        --text:      #0F172A;
+        --text2:     #475569;
+        --muted:     #94A3B8;
+      }
+    }
+    :root[data-theme="light"] {
+      --bg:        #F8FAFC;
+      --surface:   #FFFFFF;
+      --surface2:  #F1F5F9;
+      --border:    #E2E8F0;
+      --border2:   #CBD5E1;
+      --text:      #0F172A;
+      --text2:     #475569;
+      --muted:     #94A3B8;
+    }
+    :root[data-theme="dark"] {
+      --bg:        #0C0E17;
+      --surface:   #13151F;
+      --surface2:  #1A1D2E;
+      --border:    #1E2333;
+      --border2:   #2A3040;
+      --text:      #F1F5F9;
+      --text2:     #94A3B8;
+      --muted:     #4B5563;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── View system ──────────────────────────────────────── */
+    .view { display: none; }
+    body[data-view="home"]     .view-home     { display: flex; }
+    body[data-view="running"]  .view-running  { display: flex; }
+    body[data-view="report"]   .view-report   { display: flex; }
+    body[data-view="error"]    .view-error    { display: flex; }
+
+    /* ── HOME VIEW ───────────────────────────────────────── */
+    .view-home {
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .topbar {
+      width: 100%;
+      height: 52px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      justify-content: space-between;
+      background: rgba(12,14,23,0.9);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .logo-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .topbar-links { display: flex; gap: 8px; }
+
+    .ghost-btn {
+      padding: 6px 12px;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text2);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: color 0.15s, background 0.15s;
+    }
+    .ghost-btn:hover { color: var(--text); background: var(--surface); }
+
+    .theme-btn {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      font-size: 14px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text2);
+      transition: background 0.15s, color 0.15s;
+    }
+    .theme-btn:hover { background: var(--border); color: var(--text); }
+
+    .home-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 20px 80px;
+      width: 100%;
+    }
+
+    .home-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: rgba(59,130,246,0.1);
+      border: 1px solid rgba(59,130,246,0.2);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    .home-title {
+      font-size: clamp(28px, 5vw, 46px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      text-align: center;
+      margin-bottom: 14px;
+      max-width: 540px;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 50%, #EC4899 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .home-sub {
+      font-size: 15px;
+      color: var(--text2);
+      text-align: center;
+      line-height: 1.7;
+      max-width: 480px;
+      margin-bottom: 40px;
+    }
+
+    .form-card {
+      width: 100%;
+      max-width: 520px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+    }
+
+    .field { margin-bottom: 16px; }
+
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 8px;
+    }
+
+    .field-opt {
+      font-size: 10px;
+      font-weight: 400;
+      color: var(--muted);
+      text-transform: none;
+      letter-spacing: 0;
+      margin-left: 6px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border2);
+      border-radius: 9px;
+      padding: 11px 14px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    input[type="text"]::placeholder { color: var(--muted); }
+    input[type="text"]:focus { border-color: var(--accent); }
+
+    .hints-toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      margin-bottom: 16px;
+      transition: color 0.15s;
+    }
+    .hints-toggle:hover { color: var(--text2); }
+    .hints-toggle .arrow { font-size: 10px; transition: transform 0.2s; }
+    .hints-toggle.open .arrow { transform: rotate(90deg); }
+
+    .hints-fields { display: none; }
+    .hints-fields.open {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 13px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: inherit;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .submit-btn:hover:not(:disabled) { background: var(--accent2); }
+    .submit-btn:active:not(:disabled) { transform: scale(0.99); }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .examples {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+    .examples-label { font-size: 12px; color: var(--muted); }
+    .example-chip {
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      font-size: 12px;
+      color: var(--text2);
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .example-chip:hover { border-color: rgba(59,130,246,0.4); color: var(--text); }
+
+    /* ── RUNNING VIEW ────────────────────────────────────── */
+    .view-running {
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 48px 20px 80px;
+    }
+
+    .running-header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .running-brand {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .running-sub {
+      font-size: 14px;
+      color: var(--text2);
+    }
+
+    .agents-list {
+      width: 100%;
+      max-width: 520px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .agent-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      transition: border-color 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .agent-card.running::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      animation: shimmer 1.4s infinite;
+    }
+    @keyframes shimmer { 0% { left: -100%; } 100% { left: 100%; } }
+
+    .agent-card.running { border-color: rgba(59,130,246,0.3); }
+    .agent-card.done    { border-color: rgba(34,197,94,0.25); }
+
+    .agent-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .agent-icon {
+      width: 34px; height: 34px;
+      border-radius: 9px;
+      background: var(--border);
+      border: 1px solid var(--border2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      flex-shrink: 0;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .agent-card.running .agent-icon {
+      background: rgba(59,130,246,0.12);
+      border-color: rgba(59,130,246,0.3);
+    }
+    .agent-card.done .agent-icon {
+      background: rgba(34,197,94,0.12);
+      border-color: rgba(34,197,94,0.3);
+    }
+
+    .agent-meta { flex: 1; }
+    .agent-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    .agent-model {
+      font-size: 11px;
+      color: var(--muted);
+      font-family: monospace;
+      background: var(--border);
+      padding: 1px 6px;
+      border-radius: 3px;
+    }
+
+    .agent-status {
+      width: 20px; height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .status-pending {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--border2);
+    }
+
+    .status-spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(59,130,246,0.25);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .status-check { font-size: 15px; color: var(--green); }
+    .status-x     { font-size: 15px; color: var(--red); }
+
+    .agent-message {
+      font-size: 13px;
+      color: var(--text2);
+      min-height: 20px;
+    }
+
+    .agent-result {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      display: none;
+    }
+    .agent-card.done .agent-result { display: block; }
+
+    .result-pills {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .rpill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .rpill-green {
+      background: rgba(34,197,94,0.12);
+      color: var(--green);
+      border: 1px solid rgba(34,197,94,0.2);
+    }
+    .rpill-blue {
+      background: rgba(59,130,246,0.12);
+      color: var(--accent);
+      border: 1px solid rgba(59,130,246,0.2);
+    }
+    .rpill-gray {
+      background: var(--border);
+      color: var(--text2);
+      border: 1px solid var(--border2);
+    }
+
+    /* Render step */
+    .render-card {
+      width: 100%;
+      max-width: 520px;
+      margin-top: 4px;
+    }
+
+    .render-inner {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      opacity: 0.4;
+      transition: opacity 0.3s, border-color 0.3s;
+    }
+    .render-inner.active {
+      opacity: 1;
+      border-color: rgba(245,158,11,0.3);
+    }
+    .render-inner.done {
+      opacity: 1;
+      border-color: rgba(34,197,94,0.25);
+    }
+
+    .render-label { font-size: 13px; font-weight: 600; color: var(--text); }
+    .render-sub   { font-size: 12px; color: var(--muted); }
+
+    .cost-row {
+      width: 100%;
+      max-width: 520px;
+      margin-top: 20px;
+      display: flex;
+      justify-content: flex-end;
+    }
+    .cost-ticker { font-size: 12px; color: var(--muted); }
+    .cost-val {
+      color: var(--green);
+      font-weight: 600;
+      font-family: monospace;
+    }
+
+    /* ── REPORT VIEW ─────────────────────────────────────── */
+    .view-report {
+      flex-direction: column;
+      position: fixed;
+      inset: 0;
+    }
+
+    .report-bar {
+      height: 48px;
+      background: rgba(12,14,23,0.97);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .report-back {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text2);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: 7px;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+    .report-back:hover { background: var(--surface); color: var(--text); }
+
+    .report-divider { width: 1px; height: 20px; background: var(--border2); flex-shrink: 0; }
+
+    .report-brand-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .report-meta-pills { display: flex; gap: 6px; flex-shrink: 0; }
+
+    .meta-pill {
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+    .meta-pill-cost {
+      background: rgba(34,197,94,0.12);
+      color: var(--green);
+      border: 1px solid rgba(34,197,94,0.2);
+    }
+    .meta-pill-time {
+      background: var(--surface);
+      color: var(--text2);
+      border: 1px solid var(--border2);
+    }
+
+    .report-frame {
+      flex: 1;
+      border: none;
+      width: 100%;
+      background: var(--bg);
+    }
+
+    /* ── ERROR VIEW ──────────────────────────────────────── */
+    .view-error {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 32px 20px;
+    }
+
+    .error-card {
+      background: var(--surface);
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .error-icon { font-size: 36px; margin-bottom: 16px; }
+    .error-title { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+    .error-msg {
+      font-size: 14px;
+      color: var(--text2);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    .error-hint {
+      font-size: 12px;
+      color: var(--muted);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+    @media (max-width: 540px) {
+      .hints-fields.open { grid-template-columns: 1fr; }
+      .report-meta-pills .meta-pill-time { display: none; }
+    }
+  </style>
+</head>
+<body data-view="home">
+
+<!-- ═══════════════════════ HOME VIEW ════════════════════════ -->
+<div class="view view-home">
+
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-dot"></div>
+      FunnelTeardown AI
+    </div>
+    <div class="topbar-links">
+      <a href="/demo/ag1-teardown.html" class="ghost-btn" target="_blank">Demo</a>
+      <a href="https://github.com/siddchauhan77/funnel-teardown" class="ghost-btn" target="_blank">GitHub</a>
+      <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle light/dark mode">☀︎</button>
+    </div>
+  </div>
+
+  <div class="home-main">
+    <div class="home-badge">
+      <span>●</span> AI-Powered Funnel Research
+    </div>
+
+    <h1 class="home-title">
+      Reverse-engineer<br>
+      <span class="gradient-text">any brand's funnel</span>
+    </h1>
+
+    <p class="home-sub">
+      Drop a brand name. Get a full stranger→advocate funnel map
+      with What's Working / What's Missing analysis. Under $0.50.
+    </p>
+
+    <div class="form-card">
+      <form id="analyzeForm">
+        <div class="field">
+          <label for="brandInput">Brand to analyze</label>
+          <input
+            type="text"
+            id="brandInput"
+            placeholder='e.g. "Athletic Greens" or "Justin Welsh"'
+            autocomplete="off"
+            required
+          >
+        </div>
+
+        <button type="button" class="hints-toggle" id="hintsToggle">
+          <span class="arrow">▶</span>
+          Optional hints (helps with ambiguous brand names)
+        </button>
+        <div class="hints-fields" id="hintsFields">
+          <div class="field" style="margin-bottom:0">
+            <label for="urlInput">Website URL <span class="field-opt">optional</span></label>
+            <input type="text" id="urlInput" placeholder="justinwelsh.me">
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label for="founderInput">Founder <span class="field-opt">optional</span></label>
+            <input type="text" id="founderInput" placeholder="Alex Hormozi">
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">
+          <span id="submitLabel">Analyze Funnel</span>
+          <span id="submitArrow">→</span>
+        </button>
+      </form>
+
+      <div class="examples">
+        <span class="examples-label">Try:</span>
+        <button class="example-chip" onclick="fillExample('Athletic Greens', '', 'ag1.com')">Athletic Greens</button>
+        <button class="example-chip" onclick="fillExample('Justin Welsh', '', 'justinwelsh.me')">Justin Welsh</button>
+        <button class="example-chip" onclick="fillExample('Alex Hormozi', 'Alex Hormozi', '')">Alex Hormozi</button>
+        <button class="example-chip" onclick="fillExample('Morning Brew', '', '')">Morning Brew</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════ RUNNING VIEW ════════════════════ -->
+<div class="view view-running">
+  <div class="running-header">
+    <div class="running-brand" id="runningBrandName">Analyzing…</div>
+    <div class="running-sub">3 AI agents are working — this takes about 30–60 seconds</div>
+  </div>
+
+  <div class="agents-list">
+
+    <div class="agent-card pending" id="card-brand_resolver">
+      <div class="agent-top">
+        <div class="agent-icon">🔍</div>
+        <div class="agent-meta">
+          <div class="agent-name">Brand Resolver</div>
+          <span class="agent-model">gpt-4o-mini + web search</span>
+        </div>
+        <div class="agent-status" id="status-brand_resolver">
+          <div class="status-pending"></div>
+        </div>
+      </div>
+      <div class="agent-message" id="msg-brand_resolver">Waiting…</div>
+      <div class="agent-result" id="result-brand_resolver"></div>
+    </div>
+
+    <div class="agent-card pending" id="card-touchpoint_mapper">
+      <div class="agent-top">
+        <div class="agent-icon">📡</div>
+        <div class="agent-meta">
+          <div class="agent-name">Touchpoint Mapper</div>
+          <span class="agent-model">gpt-4o-mini + web search</span>
+        </div>
+        <div class="agent-status" id="status-touchpoint_mapper">
+          <div class="status-pending"></div>
+        </div>
+      </div>
+      <div class="agent-message" id="msg-touchpoint_mapper">Waiting…</div>
+      <div class="agent-result" id="result-touchpoint_mapper"></div>
+    </div>
+
+    <div class="agent-card pending" id="card-journey_mapper">
+      <div class="agent-top">
+        <div class="agent-icon">🧠</div>
+        <div class="agent-meta">
+          <div class="agent-name">Journey Mapper</div>
+          <span class="agent-model">claude-sonnet-4-6</span>
+        </div>
+        <div class="agent-status" id="status-journey_mapper">
+          <div class="status-pending"></div>
+        </div>
+      </div>
+      <div class="agent-message" id="msg-journey_mapper">Waiting…</div>
+      <div class="agent-result" id="result-journey_mapper"></div>
+    </div>
+
+  </div>
+
+  <div class="render-card">
+    <div class="render-inner" id="renderCard">
+      <div style="flex:1">
+        <div class="render-label">HTML Report</div>
+        <div class="render-sub" id="renderMsg">Waiting for agents…</div>
+      </div>
+      <div class="agent-status" id="renderStatus">
+        <div class="status-pending"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cost-row">
+    <div class="cost-ticker">
+      Running cost: <span class="cost-val" id="runningCost">$0.0000</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════ REPORT VIEW ════════════════════ -->
+<div class="view view-report">
+  <div class="report-bar">
+    <button class="report-back" onclick="goHome()">← New Analysis</button>
+    <div class="report-divider"></div>
+    <div class="report-brand-name" id="reportBrandName">—</div>
+    <div class="report-meta-pills">
+      <span class="meta-pill meta-pill-cost" id="reportCost">$0.00</span>
+      <span class="meta-pill meta-pill-time" id="reportTime">0s</span>
+    </div>
+  </div>
+  <iframe class="report-frame" id="reportFrame" title="Funnel Teardown Report"></iframe>
+</div>
+
+
+<!-- ═══════════════════════ ERROR VIEW ════════════════════ -->
+<div class="view view-error">
+  <div class="error-card">
+    <div class="error-icon">⚡</div>
+    <div class="error-title">Analysis failed</div>
+    <div class="error-msg" id="errorMsg">An unexpected error occurred.</div>
+    <div class="error-hint" id="errorHint" style="display:none"></div>
+    <button class="submit-btn" onclick="goHome()" style="max-width:200px;margin:0 auto;">
+      Try again
+    </button>
+  </div>
+</div>
+
+
+<script>
+  // ── Theme toggle ─────────────────────────────────────────────────
+  (function () {
+    var root = document.documentElement;
+    var stored = localStorage.getItem('ft-theme');
+    if (stored) {
+      root.dataset.theme = stored;
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+      root.dataset.theme = 'light';
+    } else {
+      root.dataset.theme = 'dark';
+    }
+    updateThemeIcon();
+  })();
+
+  function updateThemeIcon() {
+    var btn = document.getElementById('themeBtn');
+    if (!btn) return;
+    var isDark = document.documentElement.dataset.theme === 'dark';
+    btn.textContent = isDark ? '☀︎' : '☾';
+    btn.title = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+  }
+
+  function toggleTheme() {
+    var root = document.documentElement;
+    var next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+    root.dataset.theme = next;
+    localStorage.setItem('ft-theme', next);
+    updateThemeIcon();
+  }
+
+  // ── Helpers ──────────────────────────────────────────────────────
+  /** HTML-escape a string before inserting into DOM via innerHTML. */
+  function esc(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function pill(text, cls) {
+    return `<span class="rpill ${esc(cls)}">${esc(text)}</span>`;
+  }
+
+  // ── View state ───────────────────────────────────────────────────
+  let runningCost = 0;
+
+  function setView(v) { document.body.dataset.view = v; }
+
+  function goHome() {
+    setView('home');
+    resetProgress();
+    document.getElementById('brandInput').value = '';
+    document.getElementById('urlInput').value = '';
+    document.getElementById('founderInput').value = '';
+    document.getElementById('submitBtn').disabled = false;
+  }
+
+  // ── Hints toggle ─────────────────────────────────────────────────
+  document.getElementById('hintsToggle').addEventListener('click', function () {
+    this.classList.toggle('open');
+    document.getElementById('hintsFields').classList.toggle('open');
+  });
+
+  // ── Example chips ────────────────────────────────────────────────
+  function fillExample(brand, founder, url) {
+    document.getElementById('brandInput').value = brand;
+    document.getElementById('founderInput').value = founder;
+    document.getElementById('urlInput').value = url;
+    if (founder || url) {
+      document.getElementById('hintsToggle').classList.add('open');
+      document.getElementById('hintsFields').classList.add('open');
+    }
+    document.getElementById('brandInput').focus();
+  }
+
+  // ── Form submit ──────────────────────────────────────────────────
+  document.getElementById('analyzeForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const brand = document.getElementById('brandInput').value.trim();
+    if (!brand) return;
+    const founder = document.getElementById('founderInput').value.trim();
+    const url = document.getElementById('urlInput').value.trim();
+    document.getElementById('submitBtn').disabled = true;
+    startAnalysis(brand, founder, url);
+  });
+
+  // ── Progress helpers ─────────────────────────────────────────────
+  function resetProgress() {
+    runningCost = 0;
+    updateCost(0);
+    ['brand_resolver', 'touchpoint_mapper', 'journey_mapper'].forEach(function (agent) {
+      document.getElementById('card-' + agent).className = 'agent-card pending';
+      document.getElementById('status-' + agent).innerHTML = '<div class="status-pending"></div>';
+      document.getElementById('msg-' + agent).textContent = 'Waiting…';
+      document.getElementById('result-' + agent).innerHTML = '';
+    });
+    var rc = document.getElementById('renderCard');
+    rc.className = 'render-inner';
+    document.getElementById('renderMsg').textContent = 'Waiting for agents…';
+    document.getElementById('renderStatus').innerHTML = '<div class="status-pending"></div>';
+  }
+
+  function updateCost(v) {
+    document.getElementById('runningCost').textContent = '$' + v.toFixed(4);
+  }
+
+  function agentStart(agent, message) {
+    document.getElementById('card-' + agent).className = 'agent-card running';
+    document.getElementById('status-' + agent).innerHTML = '<div class="status-spinner"></div>';
+    document.getElementById('msg-' + agent).textContent = message;
+    document.getElementById('card-' + agent).scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function agentDone(agent, data) {
+    document.getElementById('card-' + agent).className = 'agent-card done';
+    document.getElementById('status-' + agent).innerHTML = '<span class="status-check">✓</span>';
+
+    var msg = '';
+    var pills = '';
+
+    if (agent === 'brand_resolver') {
+      msg = data.name;
+      pills  = pill(data.name, 'rpill-green');
+      pills += pill(data.website, 'rpill-blue');
+      if (data.founder) pills += pill('👤 ' + data.founder, 'rpill-gray');
+      pills += pill(data.confidence + ' conf.', 'rpill-gray');
+      document.getElementById('runningBrandName').textContent = 'Analyzing ' + data.name;
+    } else if (agent === 'touchpoint_mapper') {
+      msg = data.count + ' channels found';
+      pills = pill(data.count + ' touchpoints', 'rpill-green');
+      (data.platforms || []).forEach(function (p) {
+        pills += pill(p, 'rpill-gray');
+      });
+    } else if (agent === 'journey_mapper') {
+      msg = data.steps + ' steps · ' + data.offers + ' offers';
+      pills  = pill(data.steps + ' steps',     'rpill-green');
+      pills += pill(data.offers + ' offers',   'rpill-blue');
+      pills += pill(data.questions + ' open Qs', 'rpill-gray');
+    }
+
+    document.getElementById('msg-' + agent).textContent = msg;
+    var resultEl = document.getElementById('result-' + agent);
+    var pillsDiv = document.createElement('div');
+    pillsDiv.className = 'result-pills';
+    pillsDiv.innerHTML = pills;   // pills built from esc() — safe
+    resultEl.innerHTML = '';
+    resultEl.appendChild(pillsDiv);
+
+    if (data.cost) {
+      runningCost += data.cost;
+      updateCost(runningCost);
+    }
+  }
+
+  function renderingStart(message) {
+    document.getElementById('renderCard').className = 'render-inner active';
+    document.getElementById('renderMsg').textContent = message;
+    document.getElementById('renderStatus').innerHTML = '<div class="status-spinner"></div>';
+  }
+
+  function renderingDone() {
+    document.getElementById('renderCard').className = 'render-inner done';
+    document.getElementById('renderMsg').textContent = 'Report ready';
+    document.getElementById('renderStatus').innerHTML = '<span class="status-check">✓</span>';
+  }
+
+  // ── Main analysis ────────────────────────────────────────────────
+  function startAnalysis(brand, founder, url) {
+    resetProgress();
+    setView('running');
+    document.getElementById('runningBrandName').textContent = 'Analyzing "' + brand + '"…';
+
+    fetch('/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ brand: brand, founder: founder, url: url }),
+    }).then(function (response) {
+      if (!response.ok) {
+        showError('Server error: ' + response.status, '');
+        return;
+      }
+      var reader = response.body.getReader();
+      var decoder = new TextDecoder();
+      var buffer = '';
+
+      function read() {
+        reader.read().then(function (result) {
+          if (result.done) return;
+          buffer += decoder.decode(result.value, { stream: true });
+          var lines = buffer.split('\n');
+          buffer = lines.pop();
+          lines.forEach(function (line) {
+            if (!line.startsWith('data: ')) return;
+            try {
+              handleEvent(JSON.parse(line.slice(6)));
+            } catch (_) {}
+          });
+          read();
+        }).catch(function (err) {
+          showError('Connection lost during analysis.', 'Try again — the analysis may have timed out.');
+        });
+      }
+      read();
+
+    }).catch(function () {
+      showError('Could not reach the server. Is the app running?', '');
+    });
+  }
+
+  function handleEvent(event) {
+    switch (event.type) {
+      case 'agent_start':
+        agentStart(event.agent, event.message);
+        break;
+      case 'agent_done':
+        agentDone(event.agent, event.data);
+        break;
+      case 'rendering':
+        renderingStart(event.message);
+        break;
+      case 'report_ready':
+        renderingDone();
+        updateCost(event.cost);
+        setTimeout(function () { showReport(event); }, 600);
+        break;
+      case 'error':
+        showError(event.message, event.hint || '');
+        break;
+    }
+  }
+
+  function showReport(event) {
+    document.getElementById('reportBrandName').textContent = event.brand || 'Report';
+    document.getElementById('reportCost').textContent = '$' + event.cost.toFixed(4);
+    document.getElementById('reportTime').textContent = event.duration + 's';
+    document.getElementById('reportFrame').src = '/report/' + event.report_id;
+    setView('report');
+  }
+
+  function showError(message, hint) {
+    document.getElementById('errorMsg').textContent = message;
+    var hintEl = document.getElementById('errorHint');
+    if (hint) {
+      hintEl.textContent = hint;
+      hintEl.style.display = 'block';
+    } else {
+      hintEl.style.display = 'none';
+    }
+    setView('error');
+  }
+</script>
+
+</body>
+</html>

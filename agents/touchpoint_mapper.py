@@ -1,8 +1,8 @@
 """
 Agent 2: Touchpoint Mapper
-Model: gpt-4o-mini-search-preview (OpenAI Responses API with web search)
-Also: httpx to scrape brand homepage for social links and CTAs
-Populates: FunnelMap.touchpoints
+Model: gpt-4o-mini (OpenAI Responses API with web search)
+Also: httpx to scrape brand homepage for social links, CTAs, and brand meta
+Populates: FunnelMap.touchpoints, FunnelMap.brand.theme_color, FunnelMap.brand.logo_url
 """
 import json
 import os
@@ -51,23 +51,54 @@ Rules:
 - Return ONLY the JSON array, no markdown fences."""
 
 
-def _scrape_homepage(url: str) -> str:
-    """Fetch homepage and return simplified text of links and CTAs."""
+def _scrape_homepage(url: str) -> tuple[str, dict]:
+    """
+    Fetch homepage. Returns (links_text_for_prompt, brand_meta_dict).
+    brand_meta_dict may contain: theme_color, logo_url
+    """
     try:
         resp = http_client.get(url)
         if resp.status_code != 200:
-            return ""
+            return "", {}
+
         soup = BeautifulSoup(resp.text, "html.parser")
+
+        # Links for the AI prompt
         links = [a.get("href", "") for a in soup.find_all("a", href=True)]
-        return "\n".join(filter(None, links))[:3000]  # cap at 3000 chars
+        links_text = "\n".join(filter(None, links))[:3000]
+
+        # Brand visual meta
+        meta: dict = {}
+
+        theme_tag = soup.find("meta", attrs={"name": "theme-color"})
+        if theme_tag and theme_tag.get("content"):
+            color = theme_tag["content"].strip()
+            if color.startswith("#") or color.startswith("rgb"):
+                meta["theme_color"] = color
+
+        og_image = (
+            soup.find("meta", attrs={"property": "og:image"}) or
+            soup.find("meta", attrs={"name": "og:image"})
+        )
+        if og_image and og_image.get("content"):
+            meta["logo_url"] = og_image["content"].strip()
+
+        return links_text, meta
+
     except Exception:
-        return ""
+        return "", {}
 
 
 def map_touchpoints(state: TeardownState, tracker: CostTracker) -> None:
     """Discover brand touchpoints via web search + homepage scraping."""
     brand = state.funnel_map.brand
-    homepage_links = _scrape_homepage(brand.website)
+    homepage_links, brand_meta = _scrape_homepage(brand.website)
+
+    # Apply brand visual meta back to state immediately
+    if brand_meta.get("theme_color") and not brand.theme_color:
+        state.funnel_map.brand.theme_color = brand_meta["theme_color"]
+    if brand_meta.get("logo_url") and not brand.logo_url:
+        state.funnel_map.brand.logo_url = brand_meta["logo_url"]
 
     prompt = (
         f"Brand: {brand.name}\n"

@@ -294,7 +294,7 @@ def _open_questions_section(questions: list) -> str:
 
 
 def render_html(fm: FunnelMap) -> str:
-    """Render a FunnelMap to a standalone dark-mode HTML report."""
+    """Render a FunnelMap to a standalone HTML report with dark/light mode support."""
     flowchart = _mermaid_flowchart(fm.journey_steps)
     coverage_html = _coverage_grid(fm)
     steps_html = _step_cards(fm.journey_steps)
@@ -305,6 +305,13 @@ def render_html(fm: FunnelMap) -> str:
     cost_str = f"${meta.total_cost_usd:.4f}"
     duration_str = f"{meta.duration_seconds:.0f}s"
     brand = fm.brand
+
+    # Use brand's theme color if extracted from homepage, else default blue
+    accent = (brand.theme_color or "#3B82F6").strip()
+    # Derive a slightly darker shade for hover states (just use the same with opacity adjustments)
+    accent_dim = accent + "22"
+    accent_mid = accent + "44"
+    accent_str = accent + "33"
 
     n_steps = len(fm.journey_steps)
     n_touchpoints = len(fm.touchpoints)
@@ -329,10 +336,17 @@ def render_html(fm: FunnelMap) -> str:
     ) or "—"
 
     founder_row = (
-        f'<div style="display:flex;gap:8px;">'
-        f'<span style="color:#4B5563;font-size:13px;min-width:80px;">Founder</span>'
-        f'<span style="color:#94A3B8;font-size:13px;">{brand.founder}</span></div>'
+        f'<div class="brand-row">'
+        f'<span class="brand-row-label">Founder</span>'
+        f'<span class="brand-row-value">{brand.founder}</span></div>'
         if brand.founder else ""
+    )
+
+    logo_html = (
+        f'<img src="{brand.logo_url}" alt="{brand.name} logo" '
+        f'style="max-height:48px;max-width:120px;object-fit:contain;'
+        f'border-radius:8px;margin-bottom:12px;">'
+        if brand.logo_url else ""
     )
 
     conf_v = brand.confidence.value if hasattr(brand.confidence, "value") else str(brand.confidence)
@@ -375,7 +389,49 @@ def render_html(fm: FunnelMap) -> str:
       --text: #F1F5F9;
       --text-secondary: #94A3B8;
       --text-muted: #4B5563;
-      --accent: #3B82F6;
+      --accent: {accent};
+      --accent-dim: {accent_dim};
+      --accent-mid: {accent_mid};
+      --accent-str: {accent_str};
+      --scheme: dark;
+    }}
+
+    /* Light mode via media query */
+    @media (prefers-color-scheme: light) {{
+      :root:not([data-theme="dark"]) {{
+        --bg: #F8FAFC;
+        --surface: #FFFFFF;
+        --border: #E2E8F0;
+        --border-strong: #CBD5E1;
+        --text: #0F172A;
+        --text-secondary: #475569;
+        --text-muted: #94A3B8;
+        --scheme: light;
+      }}
+    }}
+
+    /* Explicit light mode via toggle */
+    :root[data-theme="light"] {{
+      --bg: #F8FAFC;
+      --surface: #FFFFFF;
+      --border: #E2E8F0;
+      --border-strong: #CBD5E1;
+      --text: #0F172A;
+      --text-secondary: #475569;
+      --text-muted: #94A3B8;
+      --scheme: light;
+    }}
+
+    /* Explicit dark mode via toggle (overrides media query) */
+    :root[data-theme="dark"] {{
+      --bg: #0C0E17;
+      --surface: #13151F;
+      --border: #1E2333;
+      --border-strong: #2E3347;
+      --text: #F1F5F9;
+      --text-secondary: #94A3B8;
+      --text-muted: #4B5563;
+      --scheme: dark;
     }}
 
     body {{
@@ -416,6 +472,18 @@ def render_html(fm: FunnelMap) -> str:
       letter-spacing: 0.1em;
       text-transform: uppercase;
     }}
+
+    .theme-toggle {{
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 5px 10px;
+      font-size: 13px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: background 0.15s, color 0.15s;
+    }}
+    .theme-toggle:hover {{ background: var(--border); color: var(--text); }}
 
     .topbar-divider {{
       width: 1px;
@@ -537,8 +605,8 @@ def render_html(fm: FunnelMap) -> str:
       width: 28px;
       height: 28px;
       border-radius: 7px;
-      background: var(--accent)22;
-      border: 1px solid var(--accent)44;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-mid);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -664,6 +732,7 @@ def render_html(fm: FunnelMap) -> str:
     <span class="pill pill-cost">&#36;{meta.total_cost_usd:.4f}</span>
     <span class="pill pill-time">{meta.timestamp[:10]}</span>
     <span class="pill pill-time">{duration_str}</span>
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark mode">☀︎</button>
   </div>
 </div>
 
@@ -712,6 +781,7 @@ def render_html(fm: FunnelMap) -> str:
       <span class="section-count">{conf_v} confidence</span>
     </div>
     <div class="brand-card">
+      {logo_html}
       <div class="brand-name">{brand.name}</div>
       <a href="{brand.website}" target="_blank" class="brand-website">{brand.website}</a>
       <div class="brand-meta">
@@ -822,5 +892,32 @@ def render_html(fm: FunnelMap) -> str:
   target="_blank" style="color:#3B82F6;text-decoration:none;">github.com/siddchauhan77/funnel-teardown</a>
 </footer>
 
+<script>
+  var root = document.documentElement;
+  var btn = document.getElementById('themeToggle');
+
+  // Detect initial theme: localStorage → prefers-color-scheme → dark default
+  var stored = localStorage.getItem('ft-theme');
+  if (stored) {{
+    root.dataset.theme = stored;
+  }} else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {{
+    root.dataset.theme = 'light';
+  }} else {{
+    root.dataset.theme = 'dark';
+  }}
+  updateToggleIcon();
+
+  function updateToggleIcon() {{
+    btn.textContent = root.dataset.theme === 'dark' ? '☀︎' : '☾';
+    btn.title = root.dataset.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+  }}
+
+  function toggleTheme() {{
+    var next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+    root.dataset.theme = next;
+    localStorage.setItem('ft-theme', next);
+    updateToggleIcon();
+  }}
+</script>
 </body>
 </html>"""
