@@ -56,6 +56,9 @@ class Touchpoint(BaseModel):
     evidence: list[str]
 
 
+ValueLadderRung = Literal["free", "entry", "core", "high_ticket", "continuity"]
+
+
 class JourneyStep(BaseModel):
     id: str
     label: str
@@ -66,9 +69,14 @@ class JourneyStep(BaseModel):
     exits_to: list[str]
     whats_working: list[str]
     whats_missing: list[str]
-    is_observed: bool
-    confidence: Confidence
-    evidence: list[str]
+    # Brunson frameworks
+    value_ladder_rung: ValueLadderRung = "free"
+    hook: str = ""       # What grabs attention / stops the scroll at this step
+    story: str = ""      # What belief shift / proof is being built
+    offer_cta: str = ""  # What action is being asked for / what's being presented
+    is_observed: bool = True
+    confidence: Confidence = "medium"
+    evidence: list[str] = []
 
 
 class Offer(BaseModel):
@@ -101,4 +109,5 @@ class FunnelMap(BaseModel):
     open_questions: list[str]
     worth_stealing: list[str] = []
     learning_opportunities: list[str] = []
+    ascension_path: str = ""  # One-sentence narrative of the full value ladder climb
     run_metadata: RunMetadata

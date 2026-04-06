@@ -43,6 +43,10 @@ JOURNEY_JSON = json.dumps({
             "exits_to": ["step_2"],
             "whats_working": ["Universal hook targeting a felt problem"],
             "whats_missing": ["No soft CTA to learn more"],
+            "value_ladder_rung": "free",
+            "hook": "Why does your energy crash at 2pm every day?",
+            "story": "Nutritional deficiencies explained by AG1's founder story",
+            "offer_cta": "Learn more about AG1",
             "is_observed": True,
             "confidence": "high",
             "evidence": ["https://youtube.com/@drinkag1"]
@@ -57,6 +61,10 @@ JOURNEY_JSON = json.dumps({
             "exits_to": ["step_3"],
             "whats_working": ["Strong risk reversal: 90-day money-back guarantee"],
             "whats_missing": ["No lead magnet for people not ready to buy"],
+            "value_ladder_rung": "continuity",
+            "hook": "75 high-quality ingredients in one daily drink",
+            "story": "Athletes and biohackers trust AG1 — Huberman, Goggins, etc.",
+            "offer_cta": "Subscribe & Save — get a free shaker + welcome kit",
             "is_observed": True,
             "confidence": "high",
             "evidence": ["https://ag1.com"]
@@ -78,7 +86,10 @@ JOURNEY_JSON = json.dumps({
     "open_questions": [
         "Does AG1 run Facebook/Instagram retargeting for cart abandoners?",
         "Is there an email nurture sequence between opt-in and first purchase?"
-    ]
+    ],
+    "worth_stealing": ["90-day money-back guarantee removes all purchase risk"],
+    "learning_opportunities": ["No entry-level offer leaves price-sensitive visitors with nowhere to go"],
+    "ascension_path": "Free YouTube content → $79/mo subscription (free shaker) → no high-ticket identified"
 })
 
 
@@ -133,3 +144,26 @@ def test_map_journey_whats_working_populated():
     step = state.funnel_map.journey_steps[0]
     assert len(step.whats_working) > 0
     assert len(step.whats_missing) > 0
+
+
+def test_map_journey_brunson_fields_parsed():
+    """Value ladder rung, hook, story, offer_cta, ascension_path are parsed correctly."""
+    state = _state_with_brand_and_touchpoints()
+    tracker = CostTracker()
+
+    mock_response = MagicMock()
+    mock_response.content = [MagicMock(text=JOURNEY_JSON)]
+    mock_response.usage.input_tokens = 3000
+    mock_response.usage.output_tokens = 1500
+
+    with patch("agents.journey_mapper._get_client") as mock_get_client:
+        mock_get_client.return_value.messages.create.return_value = mock_response
+        map_journey(state, tracker)
+
+    step = state.funnel_map.journey_steps[0]
+    rung_v = step.value_ladder_rung.value if hasattr(step.value_ladder_rung, "value") else str(step.value_ladder_rung)
+    assert rung_v == "free"
+    assert "2pm" in step.hook
+    assert len(step.story) > 0
+    assert len(step.offer_cta) > 0
+    assert "YouTube" in state.funnel_map.ascension_path

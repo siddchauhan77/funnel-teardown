@@ -36,6 +36,22 @@ AL_LABEL = {
     "advocate":       "Advocate",
 }
 
+VL_COLOR = {
+    "free":        "#64748B",
+    "entry":       "#3B82F6",
+    "core":        "#10B981",
+    "high_ticket": "#8B5CF6",
+    "continuity":  "#F59E0B",
+}
+
+VL_LABEL = {
+    "free":        "Free",
+    "entry":       "Entry",
+    "core":        "Core",
+    "high_ticket": "High-Ticket",
+    "continuity":  "Continuity",
+}
+
 STEP_TYPE_ICON = {
     "content": "▶",
     "landing_page": "⬛",
@@ -153,6 +169,11 @@ def _step_cards(steps: list) -> str:
         type_v = step.type.value if hasattr(step.type, "value") else str(step.type)
         icon = STEP_TYPE_ICON.get(type_v, "•")
 
+        # Brunson fields
+        rung_v = step.value_ladder_rung.value if hasattr(step.value_ladder_rung, "value") else str(step.value_ladder_rung or "free")
+        vl_badge = _vl_rung_badge(rung_v)
+        hso_html = _hso_row(step.hook or "", step.story or "", step.offer_cta or "")
+
         working_items = "".join(
             f'<li style="margin-bottom:6px;padding-left:4px;">{w}</li>'
             for w in step.whats_working
@@ -190,6 +211,8 @@ def _step_cards(steps: list) -> str:
                text-transform:uppercase;color:{color};">{al_label}</span>
           <span style="color:#374151;font-size:11px;">·</span>
           <span style="font-size:11px;color:#64748B;">{type_v.replace("_"," ")}</span>
+          <span style="color:#374151;font-size:11px;">·</span>
+          {vl_badge}
         </div>
         <h3 style="margin:4px 0 0;font-size:15px;font-weight:600;color:#F1F5F9;line-height:1.3;">
           {step.label}
@@ -205,7 +228,9 @@ def _step_cards(steps: list) -> str:
   <div style="padding:16px 20px;">
     <p style="color:#94A3B8;font-size:14px;margin:0 0 16px;line-height:1.6;">{step.description}</p>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+    {hso_html}
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
       <div style="background:#0C1A0F;border:1px solid #166534;border-radius:8px;padding:14px;">
         <div style="font-size:12px;font-weight:600;color:#22C55E;margin-bottom:10px;
              display:flex;align-items:center;gap:6px;">
@@ -282,6 +307,85 @@ def _offers_section(fm: FunnelMap) -> str:
     return "\n".join(cards)
 
 
+def _value_ladder_bar(steps: list, ascension_path: str) -> str:
+    """Visual horizontal value ladder showing which rungs are present + ascension path sentence."""
+    present_rungs: set = set()
+    for step in steps:
+        rung = getattr(step, "value_ladder_rung", None)
+        if rung:
+            rung_v = rung.value if hasattr(rung, "value") else str(rung)
+            present_rungs.add(rung_v)
+
+    rung_order = ["free", "entry", "core", "high_ticket", "continuity"]
+    rung_cells = []
+    for rung in rung_order:
+        color = VL_COLOR.get(rung, "#64748B")
+        label = VL_LABEL.get(rung, rung)
+        filled = rung in present_rungs
+        bg = f"{color}22" if filled else "#13151F"
+        border = f"1px solid {color}66" if filled else "1px solid #1E2333"
+        text_color = color if filled else "#374151"
+        dot = f'<span style="width:7px;height:7px;border-radius:50%;background:{color};display:inline-block;margin-right:5px;opacity:{1 if filled else 0.3};"></span>'
+        rung_cells.append(
+            f'<div style="flex:1;text-align:center;padding:10px 8px;background:{bg};'
+            f'border:{border};border-radius:8px;">'
+            f'<div style="font-size:11px;font-weight:600;color:{text_color};'
+            f'display:flex;align-items:center;justify-content:center;">'
+            f'{dot}{label}</div></div>'
+        )
+    arrow = '<div style="color:#374151;font-size:14px;align-self:center;flex-shrink:0;">→</div>'
+    ladder_html = arrow.join(rung_cells)
+
+    path_html = (
+        f'<div style="margin-top:12px;padding:12px 16px;background:#13151F;border:1px solid #1E2333;'
+        f'border-radius:8px;font-size:13px;color:#94A3B8;font-style:italic;line-height:1.5;">'
+        f'<span style="font-size:11px;font-weight:600;color:#4B5563;text-transform:uppercase;'
+        f'letter-spacing:0.06em;font-style:normal;">Ascension Path → </span>{ascension_path}</div>'
+        if ascension_path else ""
+    )
+
+    return (
+        f'<div style="display:flex;align-items:stretch;gap:6px;margin-bottom:4px;">'
+        f'{ladder_html}</div>{path_html}'
+    )
+
+
+def _hso_row(hook: str, story: str, offer_cta: str) -> str:
+    """Hook → Story → Offer 3-cell inline breakdown row."""
+    if not any([hook, story, offer_cta]):
+        return ""
+
+    def cell(icon, title, body, accent):
+        body_text = body or '<span style="color:#374151;font-style:italic;">Not identified</span>'
+        return (
+            f'<div style="background:#0C0E17;border:1px solid {accent}33;border-radius:8px;padding:12px 14px;">'
+            f'<div style="font-size:11px;font-weight:600;color:{accent};margin-bottom:6px;'
+            f'display:flex;align-items:center;gap:5px;text-transform:uppercase;letter-spacing:0.06em;">'
+            f'<span>{icon}</span>{title}</div>'
+            f'<p style="margin:0;font-size:13px;color:#94A3B8;line-height:1.5;">{body_text}</p>'
+            f'</div>'
+        )
+
+    return (
+        f'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px;">'
+        f'{cell("🪝", "Hook", hook, "#F59E0B")}'
+        f'{cell("📖", "Story", story, "#3B82F6")}'
+        f'{cell("⚡", "Offer / CTA", offer_cta, "#22C55E")}'
+        f'</div>'
+    )
+
+
+def _vl_rung_badge(rung: str) -> str:
+    color = VL_COLOR.get(rung, "#64748B")
+    label = VL_LABEL.get(rung, rung)
+    return (
+        f'<span style="font-size:10px;font-weight:700;color:{color};'
+        f'background:{color}22;padding:2px 8px;border-radius:20px;'
+        f'border:1px solid {color}44;text-transform:uppercase;letter-spacing:0.05em;">'
+        f'◈ {label}</span>'
+    )
+
+
 def _recap_section(worth_stealing: list, learning_opportunities: list) -> str:
     steal_cards = "".join(
         f'<div style="background:#0C1A0F;border:1px solid #166534;border-radius:10px;'
@@ -342,6 +446,7 @@ def render_html(fm: FunnelMap) -> str:
     offers_html = _offers_section(fm)
     open_q_html = _open_questions_section(fm.open_questions)
     recap_html = _recap_section(fm.worth_stealing, fm.learning_opportunities)
+    vl_bar_html = _value_ladder_bar(fm.journey_steps, fm.ascension_path)
 
     meta = fm.run_metadata
     cost_str = f"${meta.total_cost_usd:.4f}"
@@ -783,6 +888,7 @@ def render_html(fm: FunnelMap) -> str:
   <a href="#brand" class="nav-tab">Brand</a>
   <a href="#coverage" class="nav-tab">Coverage Map</a>
   <a href="#journey" class="nav-tab">Funnel Journey</a>
+  <a href="#ladder" class="nav-tab">Value Ladder</a>
   <a href="#steps" class="nav-tab">Step Analysis</a>
   <a href="#offers" class="nav-tab">Offers</a>
   <a href="#recap" class="nav-tab">Recap</a>
@@ -868,6 +974,17 @@ def render_html(fm: FunnelMap) -> str:
     </div>
   </section>
 
+  <!-- Value Ladder -->
+  <section class="section" id="ladder">
+    <div class="section-header">
+      <div class="section-icon">◈</div>
+      <span class="section-title">Value Ladder</span>
+      <span class="section-count">Brunson framework</span>
+    </div>
+    <p class="section-desc">Which rungs of the value ladder this brand occupies — and the ascension path from stranger to highest-ticket buyer.</p>
+    {vl_bar_html}
+  </section>
+
   <!-- Step analysis -->
   <section class="section" id="steps">
     <div class="section-header">
@@ -875,7 +992,7 @@ def render_html(fm: FunnelMap) -> str:
       <span class="section-title">Journey Step Analysis</span>
       <span class="section-count">{n_steps} steps</span>
     </div>
-    <p class="section-desc">Bustamante-style dual-lens review — what's working, what's missing — per funnel step.</p>
+    <p class="section-desc">Bustamante + Brunson dual-lens — Hook→Story→Offer per step, what's working, what's missing.</p>
     {steps_html}
   </section>
 
