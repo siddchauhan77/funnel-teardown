@@ -98,4 +98,6 @@ class FunnelMap(BaseModel):
     journey_steps: list[JourneyStep]
     offers: list[Offer]
     open_questions: list[str]
+    worth_stealing: list[str] = []
+    learning_opportunities: list[str] = []
     run_metadata: RunMetadata

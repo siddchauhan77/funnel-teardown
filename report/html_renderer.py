@@ -281,6 +281,46 @@ def _offers_section(fm: FunnelMap) -> str:
     return "\n".join(cards)
 
 
+def _recap_section(worth_stealing: list, learning_opportunities: list) -> str:
+    steal_cards = "".join(
+        f'<div style="background:#0C1A0F;border:1px solid #166534;border-radius:10px;'
+        f'padding:16px 18px;display:flex;gap:14px;align-items:flex-start;">'
+        f'<span style="font-size:18px;flex-shrink:0;">✦</span>'
+        f'<p style="margin:0;color:#D1FAE5;font-size:14px;line-height:1.6;">{t}</p>'
+        f'</div>'
+        for t in worth_stealing
+    ) or '<p style="color:#4B5563;font-size:14px;">—</p>'
+
+    learn_cards = "".join(
+        f'<div style="background:#1A0E06;border:1px solid #92400E;border-radius:10px;'
+        f'padding:16px 18px;display:flex;gap:14px;align-items:flex-start;">'
+        f'<span style="font-size:18px;flex-shrink:0;">⚠</span>'
+        f'<p style="margin:0;color:#FDE68A;font-size:14px;line-height:1.6;">{l}</p>'
+        f'</div>'
+        for l in learning_opportunities
+    ) or '<p style="color:#4B5563;font-size:14px;">—</p>'
+
+    return f"""
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:4px;">
+  <div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #166534;">
+      <span style="font-size:14px;">✦</span>
+      <span style="font-size:14px;font-weight:600;color:#22C55E;">Worth Stealing</span>
+      <span style="font-size:12px;color:#4B5563;background:#1E2333;padding:2px 8px;border-radius:20px;">{len(worth_stealing)}</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">{steal_cards}</div>
+  </div>
+  <div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #92400E;">
+      <span style="font-size:14px;">⚠</span>
+      <span style="font-size:14px;font-weight:600;color:#F59E0B;">Learning Opportunities</span>
+      <span style="font-size:12px;color:#4B5563;background:#1E2333;padding:2px 8px;border-radius:20px;">{len(learning_opportunities)}</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">{learn_cards}</div>
+  </div>
+</div>"""
+
+
 def _open_questions_section(questions: list) -> str:
     if not questions:
         return '<p style="color:#22C55E;font-size:14px;">No open questions — excellent coverage.</p>'
@@ -300,6 +340,7 @@ def render_html(fm: FunnelMap) -> str:
     steps_html = _step_cards(fm.journey_steps)
     offers_html = _offers_section(fm)
     open_q_html = _open_questions_section(fm.open_questions)
+    recap_html = _recap_section(fm.worth_stealing, fm.learning_opportunities)
 
     meta = fm.run_metadata
     cost_str = f"${meta.total_cost_usd:.4f}"
@@ -743,6 +784,7 @@ def render_html(fm: FunnelMap) -> str:
   <a href="#journey" class="nav-tab">Funnel Journey</a>
   <a href="#steps" class="nav-tab">Step Analysis</a>
   <a href="#offers" class="nav-tab">Offers</a>
+  <a href="#recap" class="nav-tab">Recap</a>
   <a href="#questions" class="nav-tab">Open Questions</a>
   <a href="#run" class="nav-tab">Run Details</a>
 </nav>
@@ -844,6 +886,16 @@ def render_html(fm: FunnelMap) -> str:
       <span class="section-count">{n_offers} identified</span>
     </div>
     {offers_html}
+  </section>
+
+  <!-- Recap -->
+  <section class="section" id="recap">
+    <div class="section-header">
+      <div class="section-icon">★</div>
+      <span class="section-title">Funnel Recap</span>
+    </div>
+    <p class="section-desc">The top tactics to copy and the gaps to avoid — distilled from this funnel.</p>
+    {recap_html}
   </section>
 
   <!-- Open questions -->
