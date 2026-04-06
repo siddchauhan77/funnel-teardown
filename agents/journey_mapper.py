@@ -6,12 +6,47 @@ Populates: FunnelMap.journey_steps, FunnelMap.offers, FunnelMap.open_questions
 import json
 import os
 import anthropic
+import openai
 from state.teardown_state import TeardownState
 from utils.cost_tracker import CostTracker
 from models.funnel_map import JourneyStep, Offer
 
+
 def _get_client() -> anthropic.Anthropic:
     return anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+
+
+def _get_openai_client() -> openai.OpenAI:
+    return openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+
+def _strip_json_fences(text: str) -> str:
+    """Strip markdown code fences if the model wrapped the JSON in them."""
+    text = text.strip()
+    if text.startswith("```"):
+        lines = text.split("\n")
+        text = "\n".join(lines[1:-1])
+    return text
+
+
+def _map_with_gpt(user_message: str, tracker: CostTracker) -> dict:
+    """Fallback: call GPT-4o when Anthropic is unavailable."""
+    response = _get_openai_client().chat.completions.create(
+        model="gpt-4o",
+        max_tokens=4096,
+        response_format={"type": "json_object"},
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": user_message},
+        ],
+    )
+    tracker.record(
+        "journey_mapper",
+        "gpt-4o",
+        input_tokens=response.usage.prompt_tokens,
+        output_tokens=response.usage.completion_tokens,
+    )
+    return json.loads(response.choices[0].message.content)
 
 SYSTEM_PROMPT = """You are a funnel strategist who reverse-engineers brand acquisition funnels.
 You think through the lens of Eugene Schwartz's 5 levels of awareness, extended to include
@@ -86,22 +121,23 @@ def map_journey(state: TeardownState, tracker: CostTracker) -> None:
         f"\nMap the full funnel journey for this brand."
     )
 
-    response = _get_client().messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=4096,
-        system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": user_message}],
-    )
-
-    tracker.record(
-        "journey_mapper",
-        "claude-sonnet-4-6",
-        input_tokens=response.usage.input_tokens,
-        output_tokens=response.usage.output_tokens,
-    )
-
-    raw_text = response.content[0].text
-    data = json.loads(raw_text)
+    try:
+        response = _get_client().messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=4096,
+            system=SYSTEM_PROMPT,
+            messages=[{"role": "user", "content": user_message}],
+        )
+        tracker.record(
+            "journey_mapper",
+            "claude-sonnet-4-6",
+            input_tokens=response.usage.input_tokens,
+            output_tokens=response.usage.output_tokens,
+        )
+        data = json.loads(_strip_json_fences(response.content[0].text))
+    except Exception:
+        # Claude unavailable (low credits, bad key, rate limit) — fall back to GPT-4o
+        data = _map_with_gpt(user_message, tracker)
 
     state.funnel_map.journey_steps = [JourneyStep(**s) for s in data["journey_steps"]]
     state.funnel_map.offers = [Offer(**o) for o in data["offers"]]
