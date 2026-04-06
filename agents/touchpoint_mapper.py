@@ -102,7 +102,7 @@ def map_touchpoints(state: TeardownState, tracker: CostTracker) -> None:
     name = brand.name
     site = brand.website
 
-    # 5 targeted searches — one per funnel layer
+    # 6 targeted searches — one per funnel layer
     searches = [
         # 1. Social + content channels
         (f"{name} YouTube channel Instagram TikTok Twitter X podcast site:youtube.com OR site:instagram.com OR site:twitter.com OR site:tiktok.com OR site:spotify.com"),
@@ -112,7 +112,9 @@ def map_touchpoints(state: TeardownState, tracker: CostTracker) -> None:
         (f"{name} newsletter signup lead magnet free guide email list blog {site}"),
         # 4. Products, offers, pricing, courses, membership
         (f"{name} products pricing plans courses membership program buy {site}"),
-        # 5. Referral, affiliate, community, reviews
+        # 5. Live events, workshops, in-person, conferences, masterminds
+        (f"{name} {founder or ''} live event workshop mastermind in-person conference summit tickets".strip()),
+        # 6. Referral, affiliate, community, reviews
         (f"{name} affiliate program referral ambassador community forum reviews"),
     ]
 

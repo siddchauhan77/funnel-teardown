@@ -128,7 +128,7 @@ def test_map_touchpoints_records_cost():
 
 
 def test_map_touchpoints_runs_multiple_searches():
-    """Agent 2 should fire 5 web searches — one per funnel layer."""
+    """Agent 2 should fire 6 web searches — one per funnel layer including live events."""
     state = _state_with_brand()
     tracker = CostTracker()
 
@@ -137,8 +137,8 @@ def test_map_touchpoints_runs_multiple_searches():
         mock_client = _setup_client_mock(mock_get_client)
         map_touchpoints(state, tracker)
 
-    # Should have called responses.create 5 times (5 targeted searches)
-    assert mock_client.responses.create.call_count == 5
+    # Should have called responses.create 6 times (6 targeted searches)
+    assert mock_client.responses.create.call_count == 6
     # Should have called chat.completions.create once (formatting pass)
     assert mock_client.chat.completions.create.call_count == 1
 

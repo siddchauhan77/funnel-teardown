@@ -81,10 +81,11 @@ THE FUNNEL LAYERS YOU ALWAYS MAP (in order):
    → awareness_level: "product_aware"
 
 5. CONVERSION — The offer stack (map ALL tiers you can find)
-   - Entry/tripwire offer (low-ticket: book, mini-course, $7-$97)
+   - Entry/tripwire offer (low-ticket: book, mini-course, $7-$97 — books count here)
    - Core offer (main product/service)
    - Upsell / order bump
-   - High-ticket (mastermind, coaching, agency retainer)
+   - Live event / in-person workshop / annual summit / VIP day (extremely high-intent, often missed)
+   - High-ticket (mastermind, coaching, agency retainer, equity partnership)
    - Sales page analysis: headline, proof, CTA, scarcity
    → awareness_level: "most_aware"
 
@@ -129,7 +130,7 @@ Return ONLY this JSON object:
       "id": "step_N",
       "label": "short 2-4 word label",
       "awareness_level": "unaware|problem_aware|solution_aware|product_aware|most_aware|customer|advocate",
-      "type": "content|landing_page|lead_magnet|email_sequence|thank_you_page|call|checkout|onboarding|referral|other",
+      "type": "content|landing_page|lead_magnet|email_sequence|thank_you_page|call|checkout|onboarding|referral|live_event|other",
       "description": "1-2 sentences — what happens here, specific to this brand",
       "entry_from": ["step_id or channel name"],
       "exits_to": ["step_id"],
@@ -168,7 +169,8 @@ Critical rules:
 - The founder's personal brand IS layer 1 of the funnel — map it explicitly.
 - ALWAYS analyze the thank-you page — even if it doesn't exist (that's a gap).
 - ALWAYS analyze the welcome email sequence — even if you have to infer it.
-- Include EVERY offer tier you know about (books, courses, memberships, coaching, high-ticket).
+- Include EVERY offer tier you know about (books, courses, memberships, coaching, live events, in-person workshops, high-ticket).
+- Live events and in-person workshops are almost always the highest-ticket item — NEVER skip them if they exist.
 - Never invent pricing — set price_usd to null unless publicly confirmed.
 - whats_working and whats_missing must be SPECIFIC to this brand. Quote actual copy or describe actual pages.
 - Minimum 8 journey steps. Personal brands and creators typically have 10-14."""

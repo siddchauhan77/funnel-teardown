@@ -23,7 +23,8 @@ Platform = Literal[
 
 StepType = Literal[
     "content", "landing_page", "lead_magnet", "email_sequence",
-    "thank_you_page", "call", "checkout", "onboarding", "referral", "other"
+    "thank_you_page", "call", "checkout", "onboarding", "referral",
+    "live_event", "other"
 ]
 
 OfferType = Literal[

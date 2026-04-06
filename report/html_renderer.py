@@ -46,6 +46,7 @@ STEP_TYPE_ICON = {
     "checkout": "💳",
     "onboarding": "🚀",
     "referral": "↗",
+    "live_event": "🎤",
     "other": "•",
 }
 
