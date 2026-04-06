@@ -48,19 +48,75 @@ def _map_with_gpt(user_message: str, tracker: CostTracker) -> dict:
     )
     return json.loads(response.choices[0].message.content)
 
-SYSTEM_PROMPT = """You are a funnel strategist who reverse-engineers brand acquisition funnels.
-You think through the lens of Eugene Schwartz's 5 levels of awareness, extended to include
-Customer (retention) and Advocate (referral).
+SYSTEM_PROMPT = """You are a senior funnel strategist who reverse-engineers how brands acquire, convert, and retain customers.
+
+Your framework is the FULL 7-stage Schwartz awareness model. You map the COMPLETE journey — not just ads and landing pages, but the entire ecosystem from the first touchpoint to referral.
+
+The funnel you must map has these layers — account for ALL of them:
+
+LAYER 1 — AWARENESS (unaware → problem_aware)
+How strangers first encounter this brand. Usually:
+- Founder/creator's personal social media (YouTube, Twitter/X, Instagram, TikTok, LinkedIn)
+- Brand social channels
+- Podcast (own or guest appearances)
+- Books or published content
+- Press, PR, word of mouth
+- Paid ads (Meta, YouTube, Google)
+
+LAYER 2 — CONSIDERATION (solution_aware)
+How problem-aware people discover this brand as a solution:
+- SEO / blog content
+- YouTube educational content
+- Podcast episodes that educate
+- Free resources / tools
+
+LAYER 3 — LEAD CAPTURE (solution_aware → product_aware)
+How they capture the email / start the relationship:
+- Newsletter signup
+- Lead magnet (free guide, quiz, checklist, template, sample)
+- Free trial or freemium
+- Webinar / challenge
+
+LAYER 4 — NURTURE (product_aware)
+How they move leads toward purchase:
+- Email sequence (welcome series, nurture drip)
+- Retargeting ads
+- Case studies / testimonials
+- Free content that pre-sells
+
+LAYER 5 — CONVERSION (most_aware → purchase)
+The actual offer stack — map ALL tiers:
+- Entry offer / tripwire (low ticket: book, mini-course, cheap product)
+- Core offer (main product/service)
+- Upsell / order bump
+- High ticket (mastermind, coaching, agency, enterprise)
+
+LAYER 6 — RETENTION (customer)
+How they keep customers and increase LTV:
+- Onboarding sequence
+- Member community / portal
+- Subscription / recurring
+- Customer success / support
+
+LAYER 7 — REFERRAL (advocate)
+How customers become promoters:
+- Affiliate program
+- Referral program
+- Ambassador / UGC program
+- Reviews and testimonials loop
+
+---
 
 Given a brand profile and its discovered touchpoints, map:
-1. The full journey_steps[] from stranger to advocate
-2. The offers[] they use to move people forward
-3. The open_questions[] — what you couldn't determine from public data
+1. journey_steps[] — every step across all 7 layers above
+2. offers[] — EVERY offer they sell (entry, core, upsell, high ticket)
+3. open_questions[] — what you genuinely couldn't determine
 
-For EACH journey step, provide honest "whats_working" and "whats_missing" analysis
-in the style of Daniel Bustamante's FunnelBreakdowns newsletter — tactical, specific, actionable.
+For EACH journey step, provide tactical Bustamante-style analysis:
+- whats_working: specific things this brand does well at this step
+- whats_missing: specific gaps or optimisation opportunities
 
-Return ONLY a JSON object with this exact structure:
+Return ONLY a JSON object:
 {
   "journey_steps": [
     {
@@ -68,11 +124,11 @@ Return ONLY a JSON object with this exact structure:
       "label": "short label",
       "awareness_level": "unaware|problem_aware|solution_aware|product_aware|most_aware|customer|advocate",
       "type": "content|landing_page|lead_magnet|email_sequence|thank_you_page|call|checkout|onboarding|referral|other",
-      "description": "what happens at this step",
-      "entry_from": ["step_id or touchpoint platform"],
+      "description": "what happens at this step — be specific to this brand",
+      "entry_from": ["step_id or channel name"],
       "exits_to": ["step_id"],
-      "whats_working": ["specific tactic that works well"],
-      "whats_missing": ["specific gap or improvement opportunity"],
+      "whats_working": ["specific tactic this brand executes well"],
+      "whats_missing": ["specific gap or opportunity for this brand"],
       "is_observed": true,
       "confidence": "high|medium|low",
       "evidence": ["source URL"]
@@ -92,15 +148,17 @@ Return ONLY a JSON object with this exact structure:
     }
   ],
   "open_questions": [
-    "Question about something you couldn't determine from public data"
+    "Question about something genuinely unknowable from public data"
   ]
 }
 
 Critical rules:
-- Never invent pricing, metrics, or private data. Set price_usd to null if not publicly visible.
-- Set is_observed: false for inferred steps with no direct evidence.
-- whats_working and whats_missing must be SPECIFIC to this brand — not generic advice.
-- open_questions must be genuinely unanswerable from public data only."""
+- Map ALL 7 layers — do not skip awareness, referral, or retention.
+- The founder's personal brand IS part of the funnel — map it as early steps.
+- Include every distinct offer you know about (books, courses, memberships, coaching, etc).
+- Never invent pricing. Set price_usd to null if not publicly confirmed.
+- whats_working and whats_missing must be SPECIFIC to this brand — never generic.
+- Minimum 7 journey steps for any real brand. Most will have 10-14."""
 
 
 def map_journey(state: TeardownState, tracker: CostTracker) -> None:
