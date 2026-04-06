@@ -131,5 +131,34 @@ def map_touchpoints(state: TeardownState, tracker: CostTracker) -> None:
         elif hasattr(item, "text"):
             output_text += item.text
 
-    raw = json.loads(output_text)
+    # Strip markdown fences if GPT wrapped the JSON
+    output_text = output_text.strip()
+    if output_text.startswith("```"):
+        lines = output_text.split("\n")
+        output_text = "\n".join(lines[1:-1])
+
+    # If model returned prose instead of JSON (common when web_search fires),
+    # make a second formatting call to extract the structured data
+    try:
+        raw = json.loads(output_text)
+    except json.JSONDecodeError:
+        format_response = _get_client().chat.completions.create(
+            model="gpt-4o-mini",
+            response_format={"type": "json_object"},
+            messages=[
+                {"role": "system", "content": (
+                    "Convert the brand channel information below into a JSON object "
+                    "with a single key 'touchpoints' containing an array. Each item must have: "
+                    "platform (youtube|linkedin|instagram|tiktok|newsletter|blog|podcast|seo|paid_ads|twitter|other), "
+                    "handle_or_name, url, "
+                    "awareness_level (unaware|problem_aware|solution_aware|product_aware|most_aware|customer|advocate), "
+                    "is_observed (bool), confidence (high|medium|low), evidence (list of urls). "
+                    "Return ONLY the JSON object."
+                )},
+                {"role": "user", "content": output_text},
+            ],
+        )
+        wrapped = json.loads(format_response.choices[0].message.content)
+        raw = wrapped.get("touchpoints", wrapped) if isinstance(wrapped, dict) else wrapped
+
     state.funnel_map.touchpoints = [Touchpoint(**t) for t in raw]

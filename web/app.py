@@ -124,6 +124,7 @@ def _run_pipeline(brand: str, hints: dict, q: queue.Queue) -> None:
         return
     except Exception as e:
         err = str(e)
+        print(f"[brand_resolver error] {err}", flush=True)
         if "credit" in err.lower() or "billing" in err.lower():
             q.put({"type": "error",
                    "message": "OpenAI API credit balance is too low.",
@@ -152,6 +153,7 @@ def _run_pipeline(brand: str, hints: dict, q: queue.Queue) -> None:
                }})
     except Exception as e:
         err = str(e)
+        print(f"[touchpoint_mapper error] {err}", flush=True)
         if "credit" in err.lower() or "billing" in err.lower():
             q.put({"type": "error",
                    "message": "OpenAI API credit balance is too low.",
