@@ -75,6 +75,7 @@
     body[data-view="running"]  .view-running  { display: flex; }
     body[data-view="report"]   .view-report   { display: flex; }
     body[data-view="error"]    .view-error    { display: flex; }
+    body[data-view="guide"]    .view-guide    { display: flex; }
 
     /* ── HOME VIEW ───────────────────────────────────────── */
     .view-home {
@@ -633,6 +634,178 @@
       text-align: left;
     }
 
+    /* ── GUIDE VIEW ─────────────────────────────────────── */
+    .view-guide {
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .guide-main {
+      width: 100%;
+      max-width: 680px;
+      padding: 48px 24px 80px;
+    }
+
+    .guide-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: rgba(245,158,11,0.1);
+      border: 1px solid rgba(245,158,11,0.25);
+      color: var(--amber);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .guide-title {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin-bottom: 10px;
+    }
+
+    .guide-sub {
+      font-size: 14px;
+      color: var(--text2);
+      line-height: 1.7;
+      margin-bottom: 36px;
+      max-width: 520px;
+    }
+
+    .guide-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+
+    .guide-section-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .guide-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .guide-section-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .guide-section-tag {
+      margin-left: auto;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--muted);
+      background: var(--border);
+      padding: 2px 8px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+
+    .guide-section-body {
+      padding: 16px 20px;
+    }
+
+    .guide-eli5 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .guide-detail {
+      font-size: 13px;
+      color: var(--text2);
+      line-height: 1.7;
+    }
+
+    .guide-sub-items {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .guide-sub-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      font-size: 13px;
+      color: var(--text2);
+      line-height: 1.5;
+    }
+
+    .guide-sub-label {
+      font-weight: 600;
+      color: var(--text);
+      flex-shrink: 0;
+      min-width: 90px;
+    }
+
+    .guide-cta-box {
+      margin-top: 32px;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 14px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .guide-cta-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .guide-cta-sub {
+      font-size: 13px;
+      color: var(--text2);
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .guide-cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: inherit;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .guide-cta-btn:hover { background: var(--accent2); }
+
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
@@ -711,6 +884,10 @@
           <span id="submitArrow">→</span>
         </button>
       </form>
+
+      <div id="remainingBadge" style="display:none;font-size:11px;font-weight:600;
+           letter-spacing:0.06em;text-transform:uppercase;text-align:center;
+           padding:6px 12px;border-radius:8px;border:1px solid;margin-bottom:14px;"></div>
 
       <div class="examples">
         <span class="examples-label">Try:</span>
@@ -812,6 +989,228 @@
     </div>
   </div>
   <iframe class="report-frame" id="reportFrame" title="Funnel Teardown Report"></iframe>
+</div>
+
+
+<!-- ═══════════════════════ GUIDE VIEW ════════════════════ -->
+<div class="view view-guide">
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-dot"></div>
+      FunnelTeardown AI
+    </div>
+    <div class="topbar-links">
+      <button class="ghost-btn" onclick="goHome()">← Back</button>
+      <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme">☀︎</button>
+    </div>
+  </div>
+
+  <div class="guide-main">
+    <div class="guide-badge">⏳ Daily limit reached</div>
+
+    <h1 class="guide-title">You've used all 3 analyses today.<br>Here's how to read your report.</h1>
+    <p class="guide-sub">
+      While you wait for tomorrow's limit to reset, here's a plain-English breakdown of every section in a FunnelTeardown report — so you can squeeze every drop of value out of the one you already have.
+    </p>
+
+    <!-- 1. Brand Overview -->
+    <div class="guide-section">
+      <div class="guide-section-header">
+        <div class="guide-icon" style="background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.2);">🏷</div>
+        <span class="guide-section-name">Brand Overview</span>
+        <span class="guide-section-tag">Section 1</span>
+      </div>
+      <div class="guide-section-body">
+        <div class="guide-eli5">Who is this, and who are they trying to sell to?</div>
+        <div class="guide-detail">
+          This is the AI's ID card for the brand. It shows the company name, website, founder (if found), a one-line description, and their <strong>primary ICP</strong> — Ideal Customer Profile. That last one is just a fancy way of saying: "who is the perfect person they're trying to reach?"
+          <br><br>
+          The <strong>confidence badge</strong> (high / medium / low) tells you how certain the AI was about what it found. High = it found clear public data. Low = it had to make educated guesses.
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Awareness Coverage Map -->
+    <div class="guide-section">
+      <div class="guide-section-header">
+        <div class="guide-icon" style="background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.2);">📡</div>
+        <span class="guide-section-name">Awareness Coverage Map</span>
+        <span class="guide-section-tag">Section 2</span>
+      </div>
+      <div class="guide-section-body">
+        <div class="guide-eli5">Which stages of the customer journey does this brand actually show up in?</div>
+        <div class="guide-detail">
+          Think of buying something as a journey: first you don't know the brand exists → then you realise you have a problem → then you discover their solution → then you're ready to buy. This map shows which of those stages they're actively reaching people at.
+          <br><br>
+          <strong>Gaps are the money.</strong> If a stage is grayed out, that's a hole in their funnel — people at that stage are falling through without being caught.
+        </div>
+        <div class="guide-sub-items">
+          <div class="guide-sub-item"><span class="guide-sub-label">Unaware</span> Random people who've never heard of them</div>
+          <div class="guide-sub-item"><span class="guide-sub-label">Problem Aware</span> People who know they have a problem but don't know this brand</div>
+          <div class="guide-sub-item"><span class="guide-sub-label">Solution Aware</span> People actively looking for a solution like this</div>
+          <div class="guide-sub-item"><span class="guide-sub-label">Product Aware</span> People who know about this specific brand</div>
+          <div class="guide-sub-item"><span class="guide-sub-label">Most Aware</span> People ready to buy right now</div>
+          <div class="guide-sub-item"><span class="guide-sub-label">Customer</span> People who already bought</div>
+          <div class="guide-sub-item"><span class="guide-sub-label">Advocate</span> Customers who actively refer others</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Value Ladder -->
+    <div class="guide-section">
+      <div class="guide-section-header">
+        <div class="guide-icon" style="background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.2);">◈</div>
+        <span class="guide-section-name">Value Ladder</span>
+        <span class="guide-section-tag">Section 3 · Brunson framework</span>
+      </div>
+      <div class="guide-section-body">
+        <div class="guide-eli5">All the things they sell, from free to most expensive — and how they get you to climb the stairs.</div>
+        <div class="guide-detail">
+          Russell Brunson (ClickFunnels founder) figured out that great businesses don't just sell one thing — they have a staircase of offers. You start with something free, they earn your trust, then they offer something small, then bigger, then their most expensive thing. Each rung makes the next one feel like a natural next step.
+        </div>
+        <div class="guide-sub-items">
+          <div class="guide-sub-item"><span class="guide-sub-label" style="color:#64748B;">◈ Free</span> YouTube videos, podcasts, free books — zero cost, builds trust</div>
+          <div class="guide-sub-item"><span class="guide-sub-label" style="color:#3B82F6;">◈ Entry</span> Low-ticket offers $7–$97 — books, mini-courses, a small win</div>
+          <div class="guide-sub-item"><span class="guide-sub-label" style="color:#10B981;">◈ Core</span> Main product $97–$2,000 — the thing they're really known for</div>
+          <div class="guide-sub-item"><span class="guide-sub-label" style="color:#8B5CF6;">◈ High-Ticket</span> $2,000+ — masterminds, live events, coaching, equity deals</div>
+          <div class="guide-sub-item"><span class="guide-sub-label" style="color:#F59E0B;">◈ Continuity</span> Monthly recurring — memberships, subscriptions, retainers</div>
+        </div>
+        <div class="guide-detail" style="margin-top:10px;">
+          The <strong>Ascension Path</strong> sentence below the rung bar is the single-sentence version of the full customer journey from free all the way to their biggest offer.
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Funnel Journey Diagram -->
+    <div class="guide-section">
+      <div class="guide-section-header">
+        <div class="guide-icon" style="background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.2);">⟶</div>
+        <span class="guide-section-name">Funnel Journey Diagram</span>
+        <span class="guide-section-tag">Section 4</span>
+      </div>
+      <div class="guide-section-body">
+        <div class="guide-eli5">A visual map of the path a stranger takes to become a paying customer.</div>
+        <div class="guide-detail">
+          Each box is a step in the funnel. The arrows show where people go next. The colour of each box matches the awareness stage — so you can see at a glance when the funnel is moving people from "never heard of you" toward "ready to buy."
+          <br><br>
+          <strong>Solid border</strong> = the AI actually observed this step (it exists for real). <strong>Dashed / ◦ marker</strong> = inferred — the AI is pretty sure it exists based on how similar funnels work, but couldn't confirm it directly.
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Step Analysis -->
+    <div class="guide-section">
+      <div class="guide-section-header">
+        <div class="guide-icon" style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.2);">🔍</div>
+        <span class="guide-section-name">Journey Step Analysis</span>
+        <span class="guide-section-tag">Section 5 · The main event</span>
+      </div>
+      <div class="guide-section-body">
+        <div class="guide-eli5">For every step in the funnel: what's smart about it, what's missing, and how the messaging works.</div>
+        <div class="guide-detail">
+          This is the deepest part of the report. Each funnel step gets its own card with four things:
+        </div>
+        <div class="guide-sub-items">
+          <div class="guide-sub-item">
+            <span class="guide-sub-label" style="color:#F59E0B;">🪝 Hook</span>
+            What grabs your attention and makes you stop scrolling. Could be a bold claim, a painful question, or a surprising stat.
+          </div>
+          <div class="guide-sub-item">
+            <span class="guide-sub-label" style="color:#3B82F6;">📖 Story</span>
+            What belief they're trying to change in your head. The emotional bridge — a founder story, a case study, social proof, or a reframe.
+          </div>
+          <div class="guide-sub-item">
+            <span class="guide-sub-label" style="color:#22C55E;">⚡ Offer / CTA</span>
+            What they're asking you to do next. Subscribe, buy the book, book a call, attend the event.
+          </div>
+          <div class="guide-sub-item">
+            <span class="guide-sub-label" style="color:#22C55E;">✓ Working</span>
+            Specific tactics that are done well — named with the psychological principle behind why they work.
+          </div>
+          <div class="guide-sub-item">
+            <span class="guide-sub-label" style="color:#F59E0B;">⚡ Missing</span>
+            Specific gaps — with the conversion cost of the gap and a concrete fix suggestion.
+          </div>
+        </div>
+        <div class="guide-detail" style="margin-top:10px;">
+          The <strong>◈ rung badge</strong> (Free / Entry / Core / High-Ticket / Continuity) in each step header tells you which level of the value ladder this step belongs to.
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. Offers -->
+    <div class="guide-section">
+      <div class="guide-section-header">
+        <div class="guide-icon" style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.2);">💰</div>
+        <span class="guide-section-name">Offers</span>
+        <span class="guide-section-tag">Section 6</span>
+      </div>
+      <div class="guide-section-body">
+        <div class="guide-eli5">Every product or service this brand sells, with price and what they promise.</div>
+        <div class="guide-detail">
+          Each card is one offer. The <strong>headline or promise</strong> is the core value statement — what the customer gets or feels. Price shows as "—" if it wasn't publicly listed (common for high-ticket offers that require a call). The awareness level badge shows what stage of buyer this offer is designed for.
+          <br><br>
+          <strong>What to look for:</strong> Is there an entry offer (something cheap to get people in the door)? Is there a gap between free content and the main paid offer? A missing tripwire is one of the most common funnel holes.
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. Recap -->
+    <div class="guide-section">
+      <div class="guide-section-header">
+        <div class="guide-icon" style="background:rgba(236,72,153,0.12);border:1px solid rgba(236,72,153,0.2);">★</div>
+        <span class="guide-section-name">Funnel Recap</span>
+        <span class="guide-section-tag">Section 7</span>
+      </div>
+      <div class="guide-section-body">
+        <div class="guide-eli5">The two lists you actually want to screenshot and save.</div>
+        <div class="guide-detail">
+          <strong style="color:#22C55E;">Worth Stealing (✦)</strong> — the top 3–5 tactics from this funnel that any brand could copy. These are the moves that are working so well they deserve to be replicated.
+          <br><br>
+          <strong style="color:#F59E0B;">Learning Opportunities (⚠)</strong> — the top 3–5 gaps or mistakes in this funnel worth avoiding. If you're building your own funnel, these are the things not to skip.
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. Open Questions -->
+    <div class="guide-section">
+      <div class="guide-section-header">
+        <div class="guide-icon" style="background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.2);">❓</div>
+        <span class="guide-section-name">Open Questions</span>
+        <span class="guide-section-tag">Section 8</span>
+      </div>
+      <div class="guide-section-body">
+        <div class="guide-eli5">The stuff the AI couldn't figure out from public info — these are your research leads.</div>
+        <div class="guide-detail">
+          Email open rates, backend upsell sequences, private community pricing, exact ad spend — this stuff isn't public. The open questions section lists everything the AI had to leave blank. Treat each one as a research prompt: "What would I need to find out to complete this picture?" You can often answer them by actually going through the funnel yourself.
+        </div>
+      </div>
+    </div>
+
+    <!-- 9. Run Details -->
+    <div class="guide-section">
+      <div class="guide-section-header">
+        <div class="guide-icon" style="background:rgba(100,116,139,0.12);border:1px solid rgba(100,116,139,0.2);">⚙</div>
+        <span class="guide-section-name">Run Details</span>
+        <span class="guide-section-tag">Section 9</span>
+      </div>
+      <div class="guide-section-body">
+        <div class="guide-eli5">Which AI did the work and how much did it cost to run this report?</div>
+        <div class="guide-detail">
+          Three AI agents ran in sequence to build your report. This table shows which model each agent used and what it cost in API credits. Most reports cost between $0.05 and $0.25 total — the report you got cost a fraction of what a human analyst would charge for the same research.
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="guide-cta-box">
+      <div class="guide-cta-title">Limit resets in 24 hours</div>
+      <div class="guide-cta-sub">
+        Your 3 free analyses reset every 24 hours. In the meantime, go deep on the report you already have — the insights are in the gaps.
+      </div>
+      <button class="guide-cta-btn" onclick="goHome()">← Back to Home</button>
+    </div>
+  </div>
 </div>
 
 
@@ -1055,7 +1454,13 @@
       case 'report_ready':
         renderingDone();
         updateCost(event.cost);
+        if (typeof event.remaining === 'number') {
+          updateRemainingBadge(event.remaining);
+        }
         setTimeout(function () { showReport(event); }, 600);
+        break;
+      case 'rate_limited':
+        setView('guide');
         break;
       case 'error':
         showError(event.message, event.hint || '');
@@ -1069,6 +1474,23 @@
     document.getElementById('reportTime').textContent = event.duration + 's';
     document.getElementById('reportFrame').src = '/report/' + event.report_id;
     setView('report');
+  }
+
+  function updateRemainingBadge(remaining) {
+    var el = document.getElementById('remainingBadge');
+    if (!el) return;
+    if (remaining === 0) {
+      el.textContent = 'No analyses left today';
+      el.style.color = 'var(--red)';
+      el.style.background = 'rgba(239,68,68,0.08)';
+      el.style.borderColor = 'rgba(239,68,68,0.2)';
+    } else {
+      el.textContent = remaining + ' of 3 analyses remaining today';
+      el.style.color = 'var(--amber)';
+      el.style.background = 'rgba(245,158,11,0.08)';
+      el.style.borderColor = 'rgba(245,158,11,0.2)';
+    }
+    el.style.display = 'block';
   }
 
   function showError(message, hint) {

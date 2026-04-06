@@ -12,7 +12,9 @@ import json
 import os
 import queue
 import threading
+import time
 import uuid
+from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 from typing import AsyncGenerator
@@ -20,7 +22,7 @@ from typing import AsyncGenerator
 from dotenv import load_dotenv
 load_dotenv()
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, StreamingResponse
 from pydantic import BaseModel
 
@@ -36,6 +38,38 @@ app = FastAPI(title="FunnelTeardown AI")
 
 # In-memory report store (keyed by UUID, lives for the process lifetime)
 _reports: dict[str, str] = {}
+
+# ─── Rate limiter ─────────────────────────────────────────────────────────────
+RATE_LIMIT = 3
+RATE_WINDOW = 86_400  # 24 hours
+
+_rate_store: dict[str, list[float]] = defaultdict(list)
+
+
+def _client_ip(request: Request) -> str:
+    """Return the real client IP, honouring X-Forwarded-For from Railway proxy."""
+    forwarded = request.headers.get("X-Forwarded-For")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
+
+
+def _is_rate_limited(ip: str) -> bool:
+    """Returns True if this IP has exceeded the limit. Records the attempt if allowed."""
+    now = time.time()
+    window_start = now - RATE_WINDOW
+    _rate_store[ip] = [t for t in _rate_store[ip] if t > window_start]
+    if len(_rate_store[ip]) >= RATE_LIMIT:
+        return True
+    _rate_store[ip].append(now)
+    return False
+
+
+def _attempts_remaining(ip: str) -> int:
+    now = time.time()
+    window_start = now - RATE_WINDOW
+    used = len([t for t in _rate_store[ip] if t > window_start])
+    return max(0, RATE_LIMIT - used)
 
 INDEX_HTML = Path(__file__).parent / "index.html"
 
@@ -67,17 +101,30 @@ class AnalyzeRequest(BaseModel):
 
 
 @app.post("/analyze")
-async def analyze(req: AnalyzeRequest):
+async def analyze(req: AnalyzeRequest, request: Request):
+    ip = _client_ip(request)
+
+    if _is_rate_limited(ip):
+        # Stream a single rate_limited event then close
+        async def _rate_stream():
+            yield f"data: {json.dumps({'type': 'rate_limited', 'limit': RATE_LIMIT})}\n\n"
+        return StreamingResponse(
+            _rate_stream(),
+            media_type="text/event-stream",
+            headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+        )
+
     hints: dict = {}
     if req.founder.strip():
         hints["founder"] = req.founder.strip()
     if req.url.strip():
         hints["url"] = req.url.strip()
 
+    remaining = _attempts_remaining(ip)  # after this run is counted
     q: "queue.Queue[dict | None]" = queue.Queue()
 
     def worker():
-        _run_pipeline(req.brand.strip(), hints, q)
+        _run_pipeline(req.brand.strip(), hints, q, remaining)
         q.put(None)  # sentinel — stream ends
 
     threading.Thread(target=worker, daemon=True).start()
@@ -95,7 +142,7 @@ async def analyze(req: AnalyzeRequest):
 
 # ─── Pipeline ────────────────────────────────────────────────────────────────
 
-def _run_pipeline(brand: str, hints: dict, q: queue.Queue) -> None:
+def _run_pipeline(brand: str, hints: dict, q: queue.Queue, remaining: int = 0) -> None:
     """Run the 3-agent pipeline in a background thread, push SSE dicts to q."""
     import time
     start = time.time()
@@ -222,6 +269,7 @@ def _run_pipeline(brand: str, hints: dict, q: queue.Queue) -> None:
         "brand": state.funnel_map.brand.name,
         "cost": round(tracker.total_cost(), 4),
         "duration": round(duration, 1),
+        "remaining": remaining,
     })
 
 
