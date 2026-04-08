@@ -570,7 +570,26 @@
       text-overflow: ellipsis;
     }
 
-    .report-meta-pills { display: flex; gap: 6px; flex-shrink: 0; }
+    .report-meta-pills { display: flex; gap: 6px; flex-shrink: 0; align-items: center; }
+
+    .download-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 12px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      background: rgba(34,197,94,0.1);
+      color: var(--green);
+      border: 1px solid rgba(34,197,94,0.25);
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+    .download-btn:hover { background: rgba(34,197,94,0.18); border-color: rgba(34,197,94,0.4); }
 
     .meta-pill {
       padding: 3px 10px;
@@ -986,6 +1005,7 @@
     <div class="report-meta-pills">
       <span class="meta-pill meta-pill-cost" id="reportCost">$0.00</span>
       <span class="meta-pill meta-pill-time" id="reportTime">0s</span>
+      <a id="downloadBtn" href="#" class="download-btn" download>⬇ Download</a>
     </div>
   </div>
   <iframe class="report-frame" id="reportFrame" title="Funnel Teardown Report"></iframe>
@@ -1473,6 +1493,7 @@
     document.getElementById('reportCost').textContent = '$' + event.cost.toFixed(4);
     document.getElementById('reportTime').textContent = event.duration + 's';
     document.getElementById('reportFrame').src = '/report/' + event.report_id;
+    document.getElementById('downloadBtn').href = '/download/' + event.report_id;
     setView('report');
   }
 

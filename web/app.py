@@ -36,8 +36,8 @@ from utils.cost_tracker import CostTracker
 
 app = FastAPI(title="FunnelTeardown AI")
 
-# In-memory report store (keyed by UUID, lives for the process lifetime)
-_reports: dict[str, str] = {}
+# In-memory report store — {id: {"html": str, "brand": str}}
+_reports: dict[str, dict] = {}
 
 # ─── Rate limiter ─────────────────────────────────────────────────────────────
 RATE_LIMIT = 3
@@ -88,10 +88,23 @@ def health():
 
 @app.get("/report/{report_id}", response_class=HTMLResponse)
 def get_report(report_id: str):
-    html = _reports.get(report_id)
-    if not html:
+    entry = _reports.get(report_id)
+    if not entry:
         raise HTTPException(status_code=404, detail="Report not found")
-    return HTMLResponse(html)
+    return HTMLResponse(entry["html"])
+
+
+@app.get("/download/{report_id}")
+def download_report(report_id: str):
+    entry = _reports.get(report_id)
+    if not entry:
+        raise HTTPException(status_code=404, detail="Report not found")
+    safe_name = "".join(c if c.isalnum() or c in "-_ " else "" for c in entry["brand"]).strip().replace(" ", "-")
+    filename = f"FunnelTeardown-{safe_name}.html"
+    return HTMLResponse(
+        content=entry["html"],
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 class AnalyzeRequest(BaseModel):
@@ -261,7 +274,7 @@ def _run_pipeline(brand: str, hints: dict, q: queue.Queue, remaining: int = 0) -
         return
 
     report_id = str(uuid.uuid4())
-    _reports[report_id] = report_html
+    _reports[report_id] = {"html": report_html, "brand": state.funnel_map.brand.name}
 
     q.put({
         "type": "report_ready",
