@@ -789,5 +789,375 @@
   </p>
 </footer>
 
+
+
+<!-- ===== Drafts to Done · Substack capture · v2 (seamless) ===== -->
+<!-- Drop before 
+
+<script>window.DTD_INLINE_TEXT = 'Stuck at 90% on the launch, the post, the funnel? Drafts to Done is a weekly newsletter for creators stuck at 90%. One clarity tip per week to help you hit publish.';</script>
+<!-- ===== Drafts to Done · Full Capture Stack · v3 ===== -->
+<!-- Adds 3 layers: top-right pill, auto-injected inline mid-content, scroll-triggered slide-in. -->
+<!-- Pairs with v2 bottom block (separate snippet). Total 4 capture surfaces per page. -->
+
+<!-- LAYER 1: Top pill REMOVED (v3.1 — was overlapping site nav) -->
+<!-- LAYER 3: Slide-in card (scroll-triggered, dismissable, session-stored) -->
+<aside id="dtd-slidein" class="dtd-slidein" aria-label="Drafts to Done newsletter">
+  <button class="dtd-slidein-close" aria-label="Dismiss">×</button>
+  <div class="dtd-slidein-eyebrow">DRAFTS TO DONE</div>
+  <div class="dtd-slidein-headline">Still scrolling? Get one of these in your inbox weekly.</div>
+  <form class="dtd-slidein-form" action="https://draftstodone.substack.com/subscribe" method="get" target="_blank" rel="noopener">
+    <input type="email" name="email" placeholder="you@email.com" required class="dtd-slidein-input" />
+    <button type="submit" class="dtd-slidein-btn">Subscribe</button>
+  </form>
+</aside>
+
+<style>
+  /* ===== LAYER 2: Auto-injected inline mid-content (JS adds this) ===== */
+  .dtd-inline {
+    width: 100%;
+    max-width: 640px;
+    margin: 56px auto;
+    padding: 24px 28px;
+    border-top: 1px solid rgba(127, 127, 127, 0.18);
+    border-bottom: 1px solid rgba(127, 127, 127, 0.18);
+    text-align: center;
+    font-family: inherit;
+  }
+  .dtd-inline-label {
+    font-family: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    opacity: 0.5;
+    margin-bottom: 12px;
+  }
+  .dtd-inline-text {
+    font-size: 17px;
+    line-height: 1.5;
+    opacity: 0.85;
+    margin: 0 0 16px 0;
+    color: inherit;
+  }
+  .dtd-inline-form {
+    display: flex;
+    gap: 8px;
+    max-width: 420px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+  }
+  .dtd-inline-input {
+    flex: 1 1 200px;
+    padding: 11px 14px;
+    font-size: 14px;
+    font-family: inherit;
+    color: inherit;
+    background: rgba(127, 127, 127, 0.06);
+    border: 1px solid rgba(127, 127, 127, 0.22);
+    border-radius: 7px;
+    outline: none;
+  }
+  .dtd-inline-input:focus { border-color: rgba(127, 127, 127, 0.45); }
+  .dtd-inline-input::placeholder { opacity: 0.45; }
+  .dtd-inline-btn {
+    padding: 11px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    color: inherit;
+    background: rgba(127, 127, 127, 0.14);
+    border: 1px solid rgba(127, 127, 127, 0.32);
+    border-radius: 7px;
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+  .dtd-inline-btn:hover { background: rgba(127, 127, 127, 0.22); }
+
+  /* ===== LAYER 3: Slide-in card ===== */
+  .dtd-slidein {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9997;
+    width: 340px;
+    max-width: calc(100vw - 40px);
+    padding: 22px 22px 20px 22px;
+    background: rgba(20, 20, 20, 0.92);
+    color: #f5f5f5;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    transform: translateY(120%);
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    pointer-events: none;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+  }
+  @media (prefers-color-scheme: light) {
+    .dtd-slidein {
+      background: rgba(255, 255, 255, 0.96);
+      color: #1a1a1a;
+      border-color: rgba(0, 0, 0, 0.08);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    }
+  }
+  .dtd-slidein.show {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .dtd-slidein-close {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    width: 28px;
+    height: 28px;
+    background: transparent;
+    border: none;
+    color: inherit;
+    font-size: 22px;
+    line-height: 1;
+    opacity: 0.45;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: opacity 0.15s, background 0.15s;
+  }
+  .dtd-slidein-close:hover { opacity: 1; background: rgba(127, 127, 127, 0.15); }
+  .dtd-slidein-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    opacity: 0.65;
+    margin-bottom: 8px;
+  }
+  .dtd-slidein-headline {
+    font-size: 15px;
+    line-height: 1.4;
+    font-weight: 500;
+    margin-bottom: 14px;
+  }
+  .dtd-slidein-form { display: flex; gap: 6px; }
+  .dtd-slidein-input {
+    flex: 1;
+    padding: 9px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    color: inherit;
+    background: rgba(127, 127, 127, 0.12);
+    border: 1px solid rgba(127, 127, 127, 0.25);
+    border-radius: 6px;
+    outline: none;
+  }
+  .dtd-slidein-input::placeholder { opacity: 0.5; }
+  .dtd-slidein-btn {
+    padding: 9px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    color: inherit;
+    background: rgba(127, 127, 127, 0.2);
+    border: 1px solid rgba(127, 127, 127, 0.35);
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .dtd-slidein-btn:hover { background: rgba(127, 127, 127, 0.3); }
+
+  /* ===== Mobile tweaks ===== */
+  @media (max-width: 600px) {
+    .dtd-slidein { bottom: 12px; right: 12px; left: 12px; width: auto; padding: 18px; }
+    .dtd-inline { margin: 40px 16px; padding: 20px 18px; }
+    .dtd-inline-form { flex-direction: column; }
+    .dtd-inline-btn { width: 100%; }
+  }
+</style>
+
+<script>
+(function() {
+  // Helper to build elements without innerHTML
+  function el(tag, attrs, children) {
+    var node = document.createElement(tag);
+    if (attrs) {
+      for (var k in attrs) {
+        if (k === 'class') node.className = attrs[k];
+        else if (k === 'text') node.textContent = attrs[k];
+        else node.setAttribute(k, attrs[k]);
+      }
+    }
+    if (children) {
+      for (var i = 0; i < children.length; i++) {
+        if (children[i]) node.appendChild(children[i]);
+      }
+    }
+    return node;
+  }
+
+  // ===== LAYER 2: Auto-inject inline mid-content =====
+  function injectInline() {
+    var inlineText = window.DTD_INLINE_TEXT || "Liked this? Drafts to Done is a weekly newsletter for creators stuck at 90%. One clarity tip per week to help you finally hit publish.";
+    var candidates = document.querySelectorAll('main > section, body > section, article, main > div.section');
+    if (candidates.length < 2) {
+      candidates = document.querySelectorAll('section');
+    }
+    if (candidates.length < 2) return;
+    var midIdx = Math.floor(candidates.length / 2);
+    var anchor = candidates[midIdx];
+    if (!anchor) return;
+
+    var labelEl = el('div', { 'class': 'dtd-inline-label', 'text': 'DRAFTS TO DONE · WEEKLY' });
+    var textEl = el('p', { 'class': 'dtd-inline-text', 'text': inlineText });
+    var input = el('input', { 'type': 'email', 'name': 'email', 'placeholder': 'you@email.com', 'required': 'required', 'class': 'dtd-inline-input' });
+    var btn = el('button', { 'type': 'submit', 'class': 'dtd-inline-btn', 'text': 'Subscribe' });
+    var form = el('form', { 'class': 'dtd-inline-form', 'action': 'https://draftstodone.substack.com/subscribe', 'method': 'get', 'target': '_blank', 'rel': 'noopener' }, [input, btn]);
+    var block = el('div', { 'class': 'dtd-inline' }, [labelEl, textEl, form]);
+    anchor.insertAdjacentElement('afterend', block);
+  }
+
+  // ===== LAYER 3: Slide-in trigger =====
+  function setupSlideIn() {
+    var slidein = document.getElementById('dtd-slidein');
+    if (!slidein) return;
+    if (sessionStorage.getItem('dtd-slidein-dismissed')) return;
+
+    var shown = false;
+    function checkScroll() {
+      if (shown) return;
+      var scrolled = (window.scrollY + window.innerHeight) / document.documentElement.scrollHeight;
+      if (scrolled > 0.75) {
+        slidein.classList.add('show');
+        shown = true;
+        window.removeEventListener('scroll', checkScroll);
+      }
+    }
+    window.addEventListener('scroll', checkScroll, { passive: true });
+
+    var closeBtn = slidein.querySelector('.dtd-slidein-close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function() {
+        slidein.classList.remove('show');
+        sessionStorage.setItem('dtd-slidein-dismissed', '1');
+      });
+    }
+  }
+
+  function init() { injectInline(); setupSlideIn(); }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+<!-- ===== /Drafts to Done capture stack v3 ===== -->
+
+</body>. Custom form, no iframe. Posts to Substack subscribe URL. -->
+<!-- {{EYEBROW}} = optional per-site framing line (true to "stuck at 90% / hit publish") -->
+<section class="dtd-capture" aria-label="Subscribe to Drafts to Done">
+  <div class="dtd-capture-inner">
+    <div class="dtd-eyebrow">DRAFTS TO DONE · WEEKLY</div>
+    <h2 class="dtd-headline">Stuck at 90% on the launch, the post, the funnel?</h2>
+    <p class="dtd-sub">Drafts to Done is a weekly newsletter for creators who keep stalling at the finish line. Clarity tips to help you ship.</p>
+    <form class="dtd-form" action="https://draftstodone.substack.com/subscribe" method="get" target="_blank" rel="noopener">
+      <input type="email" name="email" placeholder="you@email.com" required aria-label="Email address" class="dtd-input" />
+      <button type="submit" class="dtd-btn">Subscribe</button>
+    </form>
+    <p class="dtd-foot">By Sidd Chauhan · <a href="https://draftstodone.substack.com" target="_blank" rel="noopener">draftstodone.substack.com</a></p>
+  </div>
+</section>
+<style>
+  .dtd-capture {
+    width: 100%;
+    padding: 72px 24px;
+    display: flex;
+    justify-content: center;
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+  .dtd-capture-inner {
+    width: 100%;
+    max-width: 560px;
+    text-align: center;
+  }
+  .dtd-eyebrow {
+    font-family: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    opacity: 0.55;
+    margin-bottom: 18px;
+  }
+  .dtd-headline {
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    margin: 0 0 14px 0;
+    color: inherit;
+  }
+  .dtd-sub {
+    font-size: 16px;
+    line-height: 1.55;
+    opacity: 0.7;
+    margin: 0 0 28px 0;
+    color: inherit;
+  }
+  .dtd-form {
+    display: flex;
+    gap: 8px;
+    max-width: 440px;
+    margin: 0 auto 16px auto;
+    flex-wrap: wrap;
+  }
+  .dtd-input {
+    flex: 1 1 220px;
+    padding: 14px 16px;
+    font-size: 15px;
+    font-family: inherit;
+    color: inherit;
+    background: rgba(127, 127, 127, 0.06);
+    border: 1px solid rgba(127, 127, 127, 0.22);
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .dtd-input:focus {
+    border-color: rgba(127, 127, 127, 0.5);
+    background: rgba(127, 127, 127, 0.1);
+  }
+  .dtd-input::placeholder { opacity: 0.45; }
+  .dtd-btn {
+    padding: 14px 22px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+    color: inherit;
+    background: rgba(127, 127, 127, 0.14);
+    border: 1px solid rgba(127, 127, 127, 0.32);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    white-space: nowrap;
+  }
+  .dtd-btn:hover {
+    background: rgba(127, 127, 127, 0.22);
+  }
+  .dtd-btn:active { transform: translateY(1px); }
+  .dtd-foot {
+    font-family: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
+    font-size: 11px;
+    opacity: 0.5;
+    margin: 18px 0 0 0;
+  }
+  .dtd-foot a { color: inherit; text-decoration: underline; text-underline-offset: 2px; opacity: 0.85; }
+  @media (max-width: 600px) {
+    .dtd-capture { padding: 48px 16px; }
+    .dtd-headline { font-size: 24px; }
+    .dtd-sub { font-size: 15px; }
+    .dtd-form { flex-direction: column; }
+    .dtd-btn { width: 100%; }
+  }
+</style>
+<!-- ===== /Drafts to Done capture ===== -->
+
 </body>
 </html>
