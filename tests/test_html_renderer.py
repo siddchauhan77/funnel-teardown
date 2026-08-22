@@ -120,6 +120,56 @@ def test_render_includes_run_details_section():
     assert "gpt-4o-mini" in html or "claude-sonnet" in html
 
 
+def test_render_includes_download_controls():
+    html = render_html(_sample_funnel_map())
+    assert "Download HTML" in html
+    assert "Download JSON" in html
+    assert "Save PDF" in html
+    assert "downloadHtml()" in html
+    assert "downloadJson()" in html
+
+
+def test_render_includes_source_links_section():
+    html = render_html(_sample_funnel_map())
+    assert "Source Links" in html
+    assert "https://youtube.com/@drinkag1" in html
+    assert "https://ag1.com/products" in html
+
+
+def test_render_normalizes_markdown_source_urls():
+    fm = _sample_funnel_map()
+    fm.brand.evidence = ["[AG1 About](https://ag1.com/about)"]
+
+    html = render_html(fm)
+
+    assert 'href="https://ag1.com/about"' in html
+    assert 'href="[AG1 About]' not in html
+
+
+def test_render_includes_read_first_summary():
+    html = render_html(_sample_funnel_map())
+    assert "Read First" in html
+    assert "AG1 funnel teardown" in html
+
+
+def test_render_includes_game_scorecard():
+    html = render_html(_sample_funnel_map())
+    assert "Game Scorecard" in html
+    assert "Journey Coverage" in html
+    assert "Offer Ladder" in html
+    assert "Conversion Clarity" in html
+    assert "Evidence Quality" in html
+    assert "Retention Loop" in html
+    assert "Game Score" in html
+
+
+def test_render_uses_native_design_system_typography():
+    html = render_html(_sample_funnel_map())
+
+    assert "fonts.googleapis.com" not in html
+    assert "font-family: -apple-system" in html
+
+
 def test_render_escapes_dynamic_text():
     fm = _sample_funnel_map()
     fm.brand.name = '<script>alert("x")</script>'

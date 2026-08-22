@@ -4,69 +4,69 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FunnelTeardown AI</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:        #0C0E17;
-      --surface:   #13151F;
-      --surface2:  #1A1D2E;
-      --border:    #1E2333;
-      --border2:   #2A3040;
-      --text:      #F1F5F9;
-      --text2:     #94A3B8;
-      --muted:     #4B5563;
-      --accent:    #3B82F6;
-      --accent2:   #2563EB;
+      --bg:        #F5F5F7;
+      --surface:   #FFFFFF;
+      --surface2:  #F2F2F4;
+      --border:    #D8D8DE;
+      --border2:   #C7C7CF;
+      --text:      #1D1D1F;
+      --text2:     #515154;
+      --muted:     #86868B;
+      --accent:    #0071E3;
+      --accent2:   #0066CC;
       --green:     #22C55E;
       --amber:     #F59E0B;
       --red:       #EF4444;
+      --shadow:    0 1px 2px rgba(0,0,0,0.04), 0 12px 36px rgba(0,0,0,0.06);
     }
 
     /* Light mode */
     @media (prefers-color-scheme: light) {
       :root:not([data-theme="dark"]) {
-        --bg:        #F8FAFC;
+        --bg:        #F5F5F7;
         --surface:   #FFFFFF;
-        --surface2:  #F1F5F9;
-        --border:    #E2E8F0;
-        --border2:   #CBD5E1;
-        --text:      #0F172A;
-        --text2:     #475569;
-        --muted:     #94A3B8;
+        --surface2:  #F2F2F4;
+        --border:    #D8D8DE;
+        --border2:   #C7C7CF;
+        --text:      #1D1D1F;
+        --text2:     #515154;
+        --muted:     #86868B;
       }
     }
     :root[data-theme="light"] {
-      --bg:        #F8FAFC;
+      --bg:        #F5F5F7;
       --surface:   #FFFFFF;
-      --surface2:  #F1F5F9;
-      --border:    #E2E8F0;
-      --border2:   #CBD5E1;
-      --text:      #0F172A;
-      --text2:     #475569;
-      --muted:     #94A3B8;
+      --surface2:  #F2F2F4;
+      --border:    #D8D8DE;
+      --border2:   #C7C7CF;
+      --text:      #1D1D1F;
+      --text2:     #515154;
+      --muted:     #86868B;
     }
     :root[data-theme="dark"] {
-      --bg:        #0C0E17;
-      --surface:   #13151F;
-      --surface2:  #1A1D2E;
-      --border:    #1E2333;
-      --border2:   #2A3040;
-      --text:      #F1F5F9;
-      --text2:     #94A3B8;
-      --muted:     #4B5563;
+      --bg:        #000000;
+      --surface:   #111113;
+      --surface2:  #1C1C1E;
+      --border:    #2C2C2E;
+      --border2:   #3A3A3C;
+      --text:      #F5F5F7;
+      --text2:     #C7C7CC;
+      --muted:     #8E8E93;
+      --shadow:    0 1px 2px rgba(0,0,0,0.4), 0 18px 50px rgba(0,0,0,0.3);
     }
 
     html, body { height: 100%; }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
       background: var(--bg);
       color: var(--text);
       -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
     }
 
     /* ── View system ──────────────────────────────────────── */
@@ -92,12 +92,22 @@
       align-items: center;
       padding: 0 24px;
       justify-content: space-between;
-      background: rgba(12,14,23,0.9);
+      background: rgba(255,255,255,0.9);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       position: sticky;
       top: 0;
       z-index: 10;
+    }
+
+    :root[data-theme="dark"] .topbar {
+      background: rgba(12,14,23,0.9);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .topbar {
+        background: rgba(12,14,23,0.9);
+      }
     }
 
     .logo {
@@ -150,8 +160,23 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 48px 20px 80px;
+      padding: 44px 24px 72px;
       width: 100%;
+    }
+
+    .hero-shell {
+      width: 100%;
+      max-width: 1160px;
+      display: grid;
+      grid-template-columns: minmax(360px, 500px) minmax(440px, 1fr);
+      gap: 44px;
+      align-items: center;
+    }
+
+    .hero-copy {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
     }
 
     .home-badge {
@@ -159,41 +184,83 @@
       align-items: center;
       gap: 6px;
       padding: 4px 12px;
-      border-radius: 20px;
-      background: rgba(59,130,246,0.1);
-      border: 1px solid rgba(59,130,246,0.2);
+      border-radius: 999px;
+      background: rgba(0,113,227,0.08);
+      border: 1px solid rgba(0,113,227,0.2);
       color: var(--accent);
       font-size: 11px;
       font-weight: 600;
-      letter-spacing: 0.08em;
+      letter-spacing: 0;
       text-transform: uppercase;
       margin-bottom: 24px;
     }
 
     .home-title {
-      font-size: clamp(28px, 5vw, 46px);
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      line-height: 1.1;
-      text-align: center;
-      margin-bottom: 14px;
-      max-width: 540px;
+      font-size: 56px;
+      font-weight: 750;
+      letter-spacing: 0;
+      line-height: 1.04;
+      text-align: left;
+      margin-bottom: 16px;
+      max-width: 560px;
     }
 
     .gradient-text {
-      background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 50%, #EC4899 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      color: var(--accent);
     }
 
     .home-sub {
       font-size: 15px;
       color: var(--text2);
-      text-align: center;
+      text-align: left;
       line-height: 1.7;
-      max-width: 480px;
-      margin-bottom: 40px;
+      max-width: 500px;
+      margin-bottom: 26px;
+    }
+
+    .process-rail {
+      width: 100%;
+      max-width: 1160px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .process-step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.55) inset;
+    }
+
+    .process-step-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,113,227,0.1);
+      border: 1px solid rgba(0,113,227,0.24);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .process-step-title {
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 750;
+      margin-bottom: 3px;
+    }
+
+    .process-step-copy {
+      color: var(--text2);
+      font-size: 12px;
+      line-height: 1.45;
     }
 
     .form-card {
@@ -201,8 +268,215 @@
       max-width: 520px;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 16px;
+      border-radius: 8px;
       padding: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .mode-summary {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin: -2px 0 16px;
+    }
+
+    .mode-summary-label {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .mode-summary-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 4px;
+    }
+
+    .mode-summary-title {
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .mode-summary-meta {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 650;
+    }
+
+    .mode-summary-copy {
+      color: var(--text2);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .product-preview {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 22px 70px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    .preview-chrome {
+      height: 42px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      background: var(--surface2);
+    }
+
+    .chrome-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .chrome-dots span {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--border2);
+    }
+
+    .chrome-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .preview-body {
+      padding: 22px;
+    }
+
+    .preview-heading-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-start;
+      margin-bottom: 18px;
+    }
+
+    .preview-eyebrow {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .preview-title {
+      color: var(--text);
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.15;
+    }
+
+    .preview-score {
+      min-width: 96px;
+      text-align: right;
+    }
+
+    .preview-score strong {
+      display: block;
+      color: var(--text);
+      font-size: 44px;
+      line-height: 0.95;
+    }
+
+    .preview-score span {
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .preview-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .preview-metric {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .preview-metric strong {
+      color: var(--text);
+      display: block;
+      font-size: 18px;
+      margin-bottom: 2px;
+    }
+
+    .preview-metric span {
+      color: var(--muted);
+      display: block;
+      font-size: 11px;
+      font-weight: 650;
+      text-transform: uppercase;
+    }
+
+    .preview-map {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+
+    .preview-map-line {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      align-items: center;
+    }
+
+    .map-node {
+      min-height: 42px;
+      border-radius: 8px;
+      border: 1px solid var(--border2);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text2);
+      font-size: 11px;
+      font-weight: 700;
+      text-align: center;
+      padding: 6px;
+    }
+
+    .map-node.active {
+      border-color: rgba(0,113,227,0.35);
+      color: var(--accent);
+      background: rgba(0,113,227,0.06);
+    }
+
+    .preview-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .preview-action {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      color: var(--text2);
+      font-size: 12px;
+      font-weight: 650;
+      text-align: center;
     }
 
     .field { margin-bottom: 16px; }
@@ -213,7 +487,7 @@
       font-weight: 600;
       color: var(--text2);
       text-transform: uppercase;
-      letter-spacing: 0.07em;
+      letter-spacing: 0;
       margin-bottom: 8px;
     }
 
@@ -231,7 +505,7 @@
       width: 100%;
       background: var(--bg);
       border: 1px solid var(--border2);
-      border-radius: 9px;
+      border-radius: 8px;
       padding: 11px 14px;
       font-size: 14px;
       font-family: inherit;
@@ -272,7 +546,7 @@
     .submit-btn {
       width: 100%;
       padding: 13px;
-      border-radius: 10px;
+      border-radius: 8px;
       font-size: 14px;
       font-weight: 700;
       font-family: inherit;
@@ -300,7 +574,7 @@
     .examples-label { font-size: 12px; color: var(--muted); }
     .example-chip {
       padding: 4px 10px;
-      border-radius: 20px;
+      border-radius: 999px;
       background: var(--surface2);
       border: 1px solid var(--border2);
       font-size: 12px;
@@ -308,7 +582,7 @@
       cursor: pointer;
       transition: border-color 0.15s, color 0.15s;
     }
-    .example-chip:hover { border-color: rgba(59,130,246,0.4); color: var(--text); }
+    .example-chip:hover { border-color: rgba(0,113,227,0.35); color: var(--text); }
 
     /* ── RUNNING VIEW ────────────────────────────────────── */
     .view-running {
@@ -345,11 +619,12 @@
     .agent-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 8px;
       padding: 18px 20px;
       transition: border-color 0.3s;
       position: relative;
       overflow: hidden;
+      box-shadow: var(--shadow);
     }
 
     .agent-card.running::before {
@@ -362,7 +637,7 @@
     }
     @keyframes shimmer { 0% { left: -100%; } 100% { left: 100%; } }
 
-    .agent-card.running { border-color: rgba(59,130,246,0.3); }
+    .agent-card.running { border-color: rgba(0,113,227,0.32); }
     .agent-card.done    { border-color: rgba(34,197,94,0.25); }
 
     .agent-top {
@@ -374,7 +649,7 @@
 
     .agent-icon {
       width: 34px; height: 34px;
-      border-radius: 9px;
+      border-radius: 8px;
       background: var(--border);
       border: 1px solid var(--border2);
       display: flex;
@@ -385,8 +660,8 @@
       transition: background 0.3s, border-color 0.3s;
     }
     .agent-card.running .agent-icon {
-      background: rgba(59,130,246,0.12);
-      border-color: rgba(59,130,246,0.3);
+      background: rgba(0,113,227,0.1);
+      border-color: rgba(0,113,227,0.3);
     }
     .agent-card.done .agent-icon {
       background: rgba(34,197,94,0.12);
@@ -425,7 +700,7 @@
 
     .status-spinner {
       width: 18px; height: 18px;
-      border: 2px solid rgba(59,130,246,0.25);
+      border: 2px solid rgba(0,113,227,0.25);
       border-top-color: var(--accent);
       border-radius: 50%;
       animation: spin 0.7s linear infinite;
@@ -460,7 +735,7 @@
       align-items: center;
       gap: 4px;
       padding: 3px 10px;
-      border-radius: 20px;
+      border-radius: 999px;
       font-size: 12px;
       font-weight: 500;
     }
@@ -470,9 +745,9 @@
       border: 1px solid rgba(34,197,94,0.2);
     }
     .rpill-blue {
-      background: rgba(59,130,246,0.12);
+      background: rgba(0,113,227,0.1);
       color: var(--accent);
-      border: 1px solid rgba(59,130,246,0.2);
+      border: 1px solid rgba(0,113,227,0.2);
     }
     .rpill-gray {
       background: var(--border);
@@ -490,13 +765,14 @@
     .render-inner {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 8px;
       padding: 16px 20px;
       display: flex;
       align-items: center;
       gap: 12px;
       opacity: 0.4;
       transition: opacity 0.3s, border-color 0.3s;
+      box-shadow: var(--shadow);
     }
     .render-inner.active {
       opacity: 1;
@@ -533,7 +809,7 @@
 
     .report-bar {
       height: 48px;
-      background: rgba(12,14,23,0.97);
+      background: rgba(255,255,255,0.97);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
@@ -542,6 +818,16 @@
       padding: 0 16px;
       gap: 12px;
       flex-shrink: 0;
+    }
+
+    :root[data-theme="dark"] .report-bar {
+      background: rgba(12,14,23,0.97);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .report-bar {
+        background: rgba(12,14,23,0.97);
+      }
     }
 
     .report-back {
@@ -555,7 +841,7 @@
       border: none;
       cursor: pointer;
       padding: 6px 10px;
-      border-radius: 7px;
+      border-radius: 8px;
       transition: background 0.15s, color 0.15s;
       white-space: nowrap;
     }
@@ -580,7 +866,7 @@
       align-items: center;
       gap: 5px;
       padding: 5px 12px;
-      border-radius: 7px;
+      border-radius: 8px;
       font-size: 12px;
       font-weight: 600;
       font-family: inherit;
@@ -596,7 +882,7 @@
 
     .meta-pill {
       padding: 3px 10px;
-      border-radius: 20px;
+      border-radius: 999px;
       font-size: 11px;
       font-weight: 500;
     }
@@ -630,11 +916,12 @@
     .error-card {
       background: var(--surface);
       border: 1px solid rgba(239,68,68,0.3);
-      border-radius: 16px;
+      border-radius: 8px;
       padding: 32px;
       max-width: 480px;
       width: 100%;
       text-align: center;
+      box-shadow: var(--shadow);
     }
 
     .error-icon { font-size: 36px; margin-bottom: 16px; }
@@ -674,21 +961,21 @@
       align-items: center;
       gap: 6px;
       padding: 4px 12px;
-      border-radius: 20px;
+      border-radius: 999px;
       background: rgba(245,158,11,0.1);
       border: 1px solid rgba(245,158,11,0.25);
       color: var(--amber);
       font-size: 11px;
       font-weight: 600;
-      letter-spacing: 0.08em;
+      letter-spacing: 0;
       text-transform: uppercase;
       margin-bottom: 20px;
     }
 
     .guide-title {
-      font-size: clamp(22px, 4vw, 32px);
-      font-weight: 800;
-      letter-spacing: -0.02em;
+      font-size: 32px;
+      font-weight: 750;
+      letter-spacing: 0;
       line-height: 1.15;
       margin-bottom: 10px;
     }
@@ -704,9 +991,10 @@
     .guide-section {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 14px;
+      border-radius: 8px;
       overflow: hidden;
       margin-bottom: 14px;
+      box-shadow: var(--shadow);
     }
 
     .guide-section-header {
@@ -720,7 +1008,7 @@
     .guide-icon {
       width: 36px;
       height: 36px;
-      border-radius: 9px;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -741,9 +1029,9 @@
       color: var(--muted);
       background: var(--border);
       padding: 2px 8px;
-      border-radius: 20px;
+      border-radius: 999px;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0;
       white-space: nowrap;
     }
 
@@ -792,9 +1080,10 @@
       margin-top: 32px;
       background: var(--surface);
       border: 1px solid var(--border2);
-      border-radius: 14px;
+      border-radius: 8px;
       padding: 24px;
       text-align: center;
+      box-shadow: var(--shadow);
     }
 
     .guide-cta-title {
@@ -816,7 +1105,7 @@
       align-items: center;
       gap: 8px;
       padding: 11px 24px;
-      border-radius: 10px;
+      border-radius: 8px;
       font-size: 14px;
       font-weight: 700;
       font-family: inherit;
@@ -833,8 +1122,46 @@
     ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 
     @media (max-width: 540px) {
+      .home-main {
+        justify-content: flex-start;
+        padding: 34px 18px 56px;
+      }
+      .hero-shell {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+      .hero-copy {
+        align-items: stretch;
+      }
+      .home-badge {
+        align-self: center;
+      }
+      .home-title {
+        font-size: 44px;
+        text-align: center;
+        max-width: none;
+      }
+      .home-sub {
+        text-align: center;
+        max-width: none;
+      }
+      .form-card {
+        max-width: none;
+        padding: 22px;
+      }
+      .process-rail {
+        grid-template-columns: 1fr 1fr;
+      }
       .hints-fields.open { grid-template-columns: 1fr; }
       .report-meta-pills .meta-pill-time { display: none; }
+    }
+
+    @media (max-width: 380px) {
+      .process-rail,
+      .preview-actions,
+      .preview-metrics {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -855,80 +1182,157 @@
   </div>
 
   <div class="home-main">
-    <div class="home-badge">
-      <span>●</span> Funnel Research System
-    </div>
-
-    <h1 class="home-title">
-      Reverse-engineer<br>
-      <span class="gradient-text">any brand's funnel</span>
-    </h1>
-
-    <p class="home-sub">
-      Drop a brand name. Get a stranger→advocate funnel map
-      with What's Working / What's Missing analysis. Fast scan or full AI research.
-    </p>
-
-    <div class="form-card">
-      <form id="analyzeForm">
-        <div class="field">
-          <label for="brandInput">Brand to analyze <span style="color:var(--red);font-size:10px;">required</span></label>
-          <input
-            type="text"
-            id="brandInput"
-            placeholder='e.g. "Athletic Greens" or "Justin Welsh"'
-            autocomplete="off"
-            required
-          >
+    <div class="hero-shell">
+      <section class="hero-copy">
+        <div class="home-badge">
+          <span>●</span> Funnel Research System
         </div>
 
-        <div class="field">
-          <label for="urlInput">
-            Website URL
-            <span class="field-opt">recommended for fast mode and accuracy</span>
-          </label>
-          <input type="text" id="urlInput" placeholder="ag1.com or justinwelsh.me">
-        </div>
+        <h1 class="home-title">
+          Reverse-engineer<br>
+          <span class="gradient-text">any brand's funnel</span>
+        </h1>
 
-        <div class="field">
-          <label for="modeInput">
-            Run mode
-            <span class="field-opt">auto is safest</span>
-          </label>
-          <select id="modeInput">
-            <option value="auto" selected>Auto: AI research, fallback to fast scan</option>
-            <option value="simple">Fast scan: homepage-only, no API cost</option>
-            <option value="ai">AI research: full model-backed run</option>
-          </select>
-        </div>
+        <p class="home-sub">
+          Enter a brand and get a source-linked teardown with a journey map,
+          offer ladder, and scorecard that shows what to improve first.
+        </p>
 
-        <button type="button" class="hints-toggle" id="hintsToggle">
-          <span class="arrow">▶</span>
-          More hints (founder name, etc.)
-        </button>
-        <div class="hints-fields" id="hintsFields">
-          <div class="field" style="margin-bottom:0;grid-column:1/-1;">
-            <label for="founderInput">Founder <span class="field-opt">helps disambiguate personal brands</span></label>
-            <input type="text" id="founderInput" placeholder="Alex Hormozi">
+        <div class="form-card">
+        <form id="analyzeForm">
+          <div class="field">
+            <label for="brandInput">Brand to analyze <span style="color:var(--red);font-size:10px;">required</span></label>
+            <input
+              type="text"
+              id="brandInput"
+              placeholder='e.g. "Athletic Greens" or "Justin Welsh"'
+              autocomplete="off"
+              required
+            >
+          </div>
+
+          <div class="field">
+            <label for="urlInput">
+              Website URL
+              <span class="field-opt">recommended for fast mode and accuracy</span>
+            </label>
+            <input type="text" id="urlInput" placeholder="ag1.com or justinwelsh.me">
+          </div>
+
+          <div class="field">
+            <label for="modeInput">
+              Run mode
+              <span class="field-opt">auto is safest</span>
+            </label>
+            <select id="modeInput">
+              <option value="auto" selected>Auto: AI research, fallback to fast scan</option>
+              <option value="simple">Fast scan: homepage-only, no API cost</option>
+              <option value="ai">AI research: full model-backed run</option>
+            </select>
+          </div>
+
+          <div class="mode-summary">
+            <div class="mode-summary-label">Selected mode</div>
+            <div class="mode-summary-top">
+              <div class="mode-summary-title" id="modeTitle">Auto research</div>
+              <div class="mode-summary-meta"><span id="modeSpeed">Balanced</span> · <span id="modeCost">Variable</span></div>
+            </div>
+            <div class="mode-summary-copy" id="modeCopy">Starts with full AI research and falls back to a fast homepage scan if a provider fails.</div>
+          </div>
+
+          <button type="button" class="hints-toggle" id="hintsToggle">
+            <span class="arrow">▶</span>
+            More hints (founder name, etc.)
+          </button>
+          <div class="hints-fields" id="hintsFields">
+            <div class="field" style="margin-bottom:0;grid-column:1/-1;">
+              <label for="founderInput">Founder <span class="field-opt">helps disambiguate personal brands</span></label>
+              <input type="text" id="founderInput" placeholder="Alex Hormozi">
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn" id="submitBtn">
+            <span id="submitLabel">Analyze Funnel</span>
+            <span id="submitArrow">→</span>
+          </button>
+        </form>
+
+        <div id="remainingBadge" style="display:none;font-size:11px;font-weight:600;
+             letter-spacing:0.06em;text-transform:uppercase;text-align:center;
+             padding:6px 12px;border-radius:8px;border:1px solid;margin-bottom:14px;"></div>
+
+        <div class="examples">
+          <span class="examples-label">Try:</span>
+          <button class="example-chip" onclick="fillExample('Athletic Greens', '', 'ag1.com')">Athletic Greens</button>
+          <button class="example-chip" onclick="fillExample('Justin Welsh', '', 'justinwelsh.me')">Justin Welsh</button>
+          <button class="example-chip" onclick="fillExample('Alex Hormozi', 'Alex Hormozi', '')">Alex Hormozi</button>
+          <button class="example-chip" onclick="fillExample('Morning Brew', '', '')">Morning Brew</button>
+        </div>
+      </div>
+      </section>
+
+      <aside class="product-preview" aria-label="Report output preview">
+        <div class="preview-chrome">
+          <div class="chrome-dots"><span></span><span></span><span></span></div>
+          <div class="chrome-label">Report Output</div>
+        </div>
+        <div class="preview-body">
+          <div class="preview-heading-row">
+            <div>
+              <div class="preview-eyebrow">Game Scorecard</div>
+              <div class="preview-title">AG1 funnel teardown</div>
+            </div>
+            <div class="preview-score">
+              <strong>97</strong>
+              <span>Grade A</span>
+            </div>
+          </div>
+
+          <div class="preview-metrics">
+            <div class="preview-metric"><strong>11</strong><span>Sources</span></div>
+            <div class="preview-metric"><strong>8</strong><span>Steps</span></div>
+            <div class="preview-metric"><strong>4</strong><span>Offers</span></div>
+          </div>
+
+          <div class="preview-map">
+            <div class="preview-map-line" aria-label="Journey Map">
+              <div class="map-node active">Content</div>
+              <div class="map-node active">Lead</div>
+              <div class="map-node">Email</div>
+              <div class="map-node active">Offer</div>
+              <div class="map-node">Loop</div>
+            </div>
+          </div>
+
+          <div class="preview-actions">
+            <div class="preview-action">Source Links</div>
+            <div class="preview-action">Exports</div>
+            <div class="preview-action" title="Download HTML, JSON, or save as PDF.">HTML / JSON / PDF</div>
           </div>
         </div>
+      </aside>
+    </div>
 
-        <button type="submit" class="submit-btn" id="submitBtn">
-          <span id="submitLabel">Analyze Funnel</span>
-          <span id="submitArrow">→</span>
-        </button>
-      </form>
-
-      <div id="remainingBadge" style="display:none;font-size:11px;font-weight:600;
-           letter-spacing:0.06em;text-transform:uppercase;text-align:center;
-           padding:6px 12px;border-radius:8px;border:1px solid;margin-bottom:14px;"></div>
-
-      <div class="examples">
-        <span class="examples-label">Try:</span>
-        <button class="example-chip" onclick="fillExample('Athletic Greens', '', 'ag1.com')">Athletic Greens</button>
-        <button class="example-chip" onclick="fillExample('Justin Welsh', '', 'justinwelsh.me')">Justin Welsh</button>
-        <button class="example-chip" onclick="fillExample('Alex Hormozi', 'Alex Hormozi', '')">Alex Hormozi</button>
-        <button class="example-chip" onclick="fillExample('Morning Brew', '', '')">Morning Brew</button>
+    <div class="process-rail" aria-label="Site journey">
+      <div class="process-step">
+        <div class="process-step-num">1</div>
+        <div class="process-step-title">Give a brand</div>
+        <div class="process-step-copy">Name plus URL for cleaner source matching.</div>
+      </div>
+      <div class="process-step">
+        <div class="process-step-num">2</div>
+        <div class="process-step-title">Choose depth</div>
+        <div class="process-step-copy">Fast scan, full AI, or auto fallback.</div>
+      </div>
+      <div class="process-step">
+        <div class="process-step-num">3</div>
+        <div class="process-step-title">Map the funnel</div>
+        <div class="process-step-copy">Touchpoints, offers, evidence, journey steps.</div>
+      </div>
+      <div class="process-step">
+        <div class="process-step-num">4</div>
+        <div class="process-step-title">Use the report</div>
+        <div class="process-step-copy">Scorecard, source links, HTML, JSON, PDF.</div>
       </div>
     </div>
   </div>
@@ -939,7 +1343,7 @@
 <div class="view view-running">
   <div class="running-header">
     <div class="running-brand" id="runningBrandName">Analyzing…</div>
-    <div class="running-sub" id="runningSub">Auto mode tries AI research first and falls back to a fast homepage scan if needed.</div>
+    <div class="running-sub" id="runningSub">Mapping touchpoints, scoring the funnel, and preparing source-linked exports.</div>
   </div>
 
   <div class="agents-list">
@@ -1051,7 +1455,7 @@
     <!-- 1. Brand Overview -->
     <div class="guide-section">
       <div class="guide-section-header">
-        <div class="guide-icon" style="background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.2);">🏷</div>
+        <div class="guide-icon" style="background:rgba(0,113,227,0.1);border:1px solid rgba(0,113,227,0.2);">🏷</div>
         <span class="guide-section-name">Brand Overview</span>
         <span class="guide-section-tag">Section 1</span>
       </div>
@@ -1065,12 +1469,27 @@
       </div>
     </div>
 
-    <!-- 2. Awareness Coverage Map -->
+    <!-- 2. Game Scorecard -->
+    <div class="guide-section">
+      <div class="guide-section-header">
+        <div class="guide-icon" style="background:rgba(0,113,227,0.1);border:1px solid rgba(0,113,227,0.2);">🏁</div>
+        <span class="guide-section-name">Game Scorecard</span>
+        <span class="guide-section-tag">Section 2</span>
+      </div>
+      <div class="guide-section-body">
+        <div class="guide-eli5">What is the funnel's current score, and what should improve first?</div>
+        <div class="guide-detail">
+          The scorecard turns the teardown into a decision tool. It grades Journey Coverage, Offer Ladder, Conversion Clarity, Evidence Quality, and Retention Loop. The lowest score is the first lever to improve because it is the weakest part of the current funnel system.
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Awareness Coverage Map -->
     <div class="guide-section">
       <div class="guide-section-header">
         <div class="guide-icon" style="background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.2);">📡</div>
         <span class="guide-section-name">Awareness Coverage Map</span>
-        <span class="guide-section-tag">Section 2</span>
+        <span class="guide-section-tag">Section 3</span>
       </div>
       <div class="guide-section-body">
         <div class="guide-eli5">Which stages of the customer journey does this brand actually show up in?</div>
@@ -1091,12 +1510,12 @@
       </div>
     </div>
 
-    <!-- 3. Value Ladder -->
+    <!-- 4. Value Ladder -->
     <div class="guide-section">
       <div class="guide-section-header">
         <div class="guide-icon" style="background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.2);">◈</div>
         <span class="guide-section-name">Value Ladder</span>
-        <span class="guide-section-tag">Section 3 · Brunson framework</span>
+        <span class="guide-section-tag">Section 4 · Brunson framework</span>
       </div>
       <div class="guide-section-body">
         <div class="guide-eli5">All the things they sell, from free to most expensive — and how they get you to climb the stairs.</div>
@@ -1105,9 +1524,9 @@
         </div>
         <div class="guide-sub-items">
           <div class="guide-sub-item"><span class="guide-sub-label" style="color:#64748B;">◈ Free</span> YouTube videos, podcasts, free books — zero cost, builds trust</div>
-          <div class="guide-sub-item"><span class="guide-sub-label" style="color:#3B82F6;">◈ Entry</span> Low-ticket offers $7–$97 — books, mini-courses, a small win</div>
+          <div class="guide-sub-item"><span class="guide-sub-label" style="color:var(--accent);">◈ Entry</span> Low-ticket offers $7–$97 — books, mini-courses, a small win</div>
           <div class="guide-sub-item"><span class="guide-sub-label" style="color:#10B981;">◈ Core</span> Main product $97–$2,000 — the thing they're really known for</div>
-          <div class="guide-sub-item"><span class="guide-sub-label" style="color:#8B5CF6;">◈ High-Ticket</span> $2,000+ — masterminds, live events, coaching, equity deals</div>
+          <div class="guide-sub-item"><span class="guide-sub-label" style="color:var(--muted);">◈ High-Ticket</span> $2,000+ — masterminds, live events, coaching, equity deals</div>
           <div class="guide-sub-item"><span class="guide-sub-label" style="color:#F59E0B;">◈ Continuity</span> Monthly recurring — memberships, subscriptions, retainers</div>
         </div>
         <div class="guide-detail" style="margin-top:10px;">
@@ -1116,12 +1535,12 @@
       </div>
     </div>
 
-    <!-- 4. Funnel Journey Diagram -->
+    <!-- 5. Funnel Journey Diagram -->
     <div class="guide-section">
       <div class="guide-section-header">
-        <div class="guide-icon" style="background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.2);">⟶</div>
+        <div class="guide-icon" style="background:rgba(0,113,227,0.1);border:1px solid rgba(0,113,227,0.2);">⟶</div>
         <span class="guide-section-name">Funnel Journey Diagram</span>
-        <span class="guide-section-tag">Section 4</span>
+        <span class="guide-section-tag">Section 5</span>
       </div>
       <div class="guide-section-body">
         <div class="guide-eli5">A visual map of the path a stranger takes to become a paying customer.</div>
@@ -1133,12 +1552,12 @@
       </div>
     </div>
 
-    <!-- 5. Step Analysis -->
+    <!-- 6. Step Analysis -->
     <div class="guide-section">
       <div class="guide-section-header">
         <div class="guide-icon" style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.2);">🔍</div>
         <span class="guide-section-name">Journey Step Analysis</span>
-        <span class="guide-section-tag">Section 5 · The main event</span>
+        <span class="guide-section-tag">Section 6 · The main event</span>
       </div>
       <div class="guide-section-body">
         <div class="guide-eli5">For every step in the funnel: what's smart about it, what's missing, and how the messaging works.</div>
@@ -1151,7 +1570,7 @@
             What grabs your attention and makes you stop scrolling. Could be a bold claim, a painful question, or a surprising stat.
           </div>
           <div class="guide-sub-item">
-            <span class="guide-sub-label" style="color:#3B82F6;">📖 Story</span>
+            <span class="guide-sub-label" style="color:var(--accent);">📖 Story</span>
             What belief they're trying to change in your head. The emotional bridge — a founder story, a case study, social proof, or a reframe.
           </div>
           <div class="guide-sub-item">
@@ -1173,12 +1592,12 @@
       </div>
     </div>
 
-    <!-- 6. Offers -->
+    <!-- 7. Offers -->
     <div class="guide-section">
       <div class="guide-section-header">
         <div class="guide-icon" style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.2);">💰</div>
         <span class="guide-section-name">Offers</span>
-        <span class="guide-section-tag">Section 6</span>
+        <span class="guide-section-tag">Section 7</span>
       </div>
       <div class="guide-section-body">
         <div class="guide-eli5">Every product or service this brand sells, with price and what they promise.</div>
@@ -1190,12 +1609,12 @@
       </div>
     </div>
 
-    <!-- 7. Recap -->
+    <!-- 8. Recap -->
     <div class="guide-section">
       <div class="guide-section-header">
         <div class="guide-icon" style="background:rgba(236,72,153,0.12);border:1px solid rgba(236,72,153,0.2);">★</div>
         <span class="guide-section-name">Funnel Recap</span>
-        <span class="guide-section-tag">Section 7</span>
+        <span class="guide-section-tag">Section 8</span>
       </div>
       <div class="guide-section-body">
         <div class="guide-eli5">The two lists you actually want to screenshot and save.</div>
@@ -1207,12 +1626,12 @@
       </div>
     </div>
 
-    <!-- 8. Open Questions -->
+    <!-- 9. Open Questions -->
     <div class="guide-section">
       <div class="guide-section-header">
-        <div class="guide-icon" style="background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.2);">❓</div>
+        <div class="guide-icon" style="background:rgba(0,113,227,0.1);border:1px solid rgba(0,113,227,0.2);">❓</div>
         <span class="guide-section-name">Open Questions</span>
-        <span class="guide-section-tag">Section 8</span>
+        <span class="guide-section-tag">Section 9</span>
       </div>
       <div class="guide-section-body">
         <div class="guide-eli5">The stuff the AI couldn't figure out from public info — these are your research leads.</div>
@@ -1222,12 +1641,12 @@
       </div>
     </div>
 
-    <!-- 9. Run Details -->
+    <!-- 10. Run Details -->
     <div class="guide-section">
       <div class="guide-section-header">
         <div class="guide-icon" style="background:rgba(100,116,139,0.12);border:1px solid rgba(100,116,139,0.2);">⚙</div>
         <span class="guide-section-name">Run Details</span>
-        <span class="guide-section-tag">Section 9</span>
+        <span class="guide-section-tag">Section 10</span>
       </div>
       <div class="guide-section-body">
         <div class="guide-eli5">Which AI did the work and how much did it cost to run this report?</div>
@@ -1309,6 +1728,42 @@
     return `<span class="rpill ${esc(cls)}">${esc(text)}</span>`;
   }
 
+  const modeContent = {
+    auto: {
+      title: 'Auto research',
+      copy: 'Starts with full AI research and falls back to a fast homepage scan if a provider fails.',
+      speed: 'Balanced',
+      cost: 'Variable',
+      evidence: 'Best available',
+      fallback: 'Yes',
+    },
+    simple: {
+      title: 'Fast scan',
+      copy: 'Uses the homepage and visible links only. Best for quick checks, demos, and low-risk tests.',
+      speed: 'Fastest',
+      cost: '$0',
+      evidence: 'Homepage',
+      fallback: 'Not needed',
+    },
+    ai: {
+      title: 'AI research',
+      copy: 'Runs the full model-backed pipeline. Best when you need richer public research and stronger inference.',
+      speed: 'Slower',
+      cost: 'API usage',
+      evidence: 'Broadest',
+      fallback: 'No',
+    },
+  };
+
+  function updateModeCard() {
+    var mode = document.getElementById('modeInput').value;
+    var data = modeContent[mode] || modeContent.auto;
+    document.getElementById('modeTitle').textContent = data.title;
+    document.getElementById('modeCopy').textContent = data.copy;
+    document.getElementById('modeSpeed').textContent = data.speed;
+    document.getElementById('modeCost').textContent = data.cost;
+  }
+
   // ── View state ───────────────────────────────────────────────────
   let runningCost = 0;
 
@@ -1340,7 +1795,11 @@
       document.getElementById('hintsFields').classList.add('open');
     }
     document.getElementById('brandInput').focus();
+    updateModeCard();
   }
+
+  document.getElementById('modeInput').addEventListener('change', updateModeCard);
+  updateModeCard();
 
   // ── Form submit ──────────────────────────────────────────────────
   document.getElementById('analyzeForm').addEventListener('submit', function (e) {

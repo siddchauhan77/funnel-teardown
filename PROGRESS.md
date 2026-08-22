@@ -6,9 +6,9 @@
 
 ## Current Checkpoint
 
-**Status:** v1 complete and LIVE.
+**Status:** v1.1 complete in repo. Frontend/report quality pass done. Deployment is a separate step.
 **Live URL:** https://funnelteardownai.up.railway.app
-**Last worked on:** 2026-04-05
+**Last worked on:** 2026-08-22
 
 ---
 
@@ -26,18 +26,45 @@
 - [x] **Agent 3 — Journey Mapper** (`agents/journey_mapper.py`) — `claude-sonnet-4-6`. Full Schwartz 7-level funnel mapping: journey steps, offers, What's Working / What's Missing (Bustamante-style), open questions.
 
 ### Report & CLI
-- [x] **HTML Renderer** (`report/html_renderer.py`) — Pure Python, no LLM. `FunnelMap` → standalone HTML with Mermaid.js flowchart, awareness coverage grid, step analysis cards, offers table, dark/light mode toggle, brand accent color pulled from homepage.
+- [x] **HTML Renderer** (`report/html_renderer.py`) — Pure Python, no LLM. `FunnelMap` → standalone HTML with Mermaid.js flowchart, Game Scorecard, Read First summary, awareness coverage grid, source links, step analysis cards, offers table, export controls, dark/light mode toggle, brand accent color pulled from homepage.
 - [x] **CLI entry point** (`teardown.py`) — `python3 teardown.py "Brand Name" [--url site.com] [--founder Name] [--from-cache] [--agent N]`. Rich terminal output. Saves `output/<slug>_<timestamp>/funnel_map.json` + `teardown_report.html`.
 
 ### Web App
 - [x] **FastAPI backend** (`web/app.py`) — `/analyze` endpoint streams real-time agent progress via Server-Sent Events (SSE). `/report/{id}` serves the generated HTML report. In-memory UUID-keyed report store.
-- [x] **SPA frontend** (`web/index.html`) — 4 view states (home → running → report → error). Live progress cards per agent with shimmer animations. Light/dark mode toggle with `localStorage` persistence.
+- [x] **SPA frontend** (`web/index.html`) — 4 view states (home → running → report → error). Product-led homepage, report preview, run mode summary, process rail, live progress cards per agent with shimmer animations, light/dark mode toggle with `localStorage` persistence.
 - [x] **Railway config** — `Procfile` + `railway.toml` (nixpacks, health check, restart on failure). Railway chosen over Vercel because the 30–60s pipeline exceeds Vercel's 10s serverless timeout.
 
 ### Tests & Docs
-- [x] Full test suite — ~30 tests across models, cost tracker, state, all 3 agents (mocked), HTML renderer, CLI integration
-- [x] `README.md` — full tutorial: install, setup, CLI usage, all flags, report walkthrough, cost reference
+- [x] Full test suite — 58 tests across models, cost tracker, state, all 3 agents (mocked), simple mode, HTML renderer, web index, CLI integration
+- [x] `README.md` — full tutorial: install, setup, CLI usage, all flags, report walkthrough, scorecard, source links, exports, cost reference
 - [x] Demo report — `demo/ag1-teardown.html` (AG1 mock data, rendered with real renderer)
+
+---
+
+## 2026-08-22 Update — Report and Frontend Quality Pass
+
+Shipped:
+
+- [x] Added deterministic Game Scorecard to report renderer: Journey Coverage, Offer Ladder, Conversion Clarity, Evidence Quality, Retention Loop
+- [x] Added Read First section with priority takeaways
+- [x] Added normalized Source Links section with deduped evidence cards
+- [x] Added report actions: Download HTML, Download JSON, Save PDF
+- [x] Reworked homepage into a clearer product-led layout with form, selected mode summary, report preview, and process rail
+- [x] Moved homepage and report typography to native system fonts
+- [x] Added web-index tests for homepage journey, report output explanation, scorecard guide section, and native typography rules
+- [x] Added renderer tests for downloads, source links, markdown URL normalization, Read First, Game Scorecard, and native typography
+
+Verification:
+
+- [x] `python3 -m pytest` → 58 passed
+- [x] Simple web analysis completed against `example.com`
+- [x] Report served at `/report/{id}`
+- [x] Red-team check passed for generated AG1, Justin Welsh, and Morning Brew reports
+- [x] Playwright CLI screenshots captured for desktop homepage, mobile homepage, and live report
+
+Known limitation:
+
+- [ ] Playwright authored interaction specs are not installed as a repo dependency. The CLI screenshot path works, but repeatable interaction specs need `@playwright/test` or a small committed smoke script.
 
 ---
 

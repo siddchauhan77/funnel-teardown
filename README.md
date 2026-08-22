@@ -1,6 +1,6 @@
 # FunnelTeardown AI
 
-**Reverse-engineer any brand's customer acquisition funnel using either a fast homepage scan or a multi-agent AI pipeline. Drop a brand name, get a structured stranger-to-advocate report.**
+**Reverse-engineer any brand's customer acquisition funnel using either a fast homepage scan or a multi-agent AI pipeline. Drop a brand name, get a source-linked stranger-to-advocate report with a scorecard, journey map, offer ladder, and export-ready files.**
 
 🔗 **[Try it live → funnelteardownai.up.railway.app](https://funnelteardownai.up.railway.app)**
 &nbsp;&nbsp;|&nbsp;&nbsp;
@@ -20,13 +20,17 @@ There's no tool that does this systematically, maps it to a framework, and flags
 
 A three-agent AI pipeline that takes a brand name as input and returns:
 
+- **Game Scorecard** — grades Journey Coverage, Offer Ladder, Conversion Clarity, Evidence Quality, and Retention Loop, then points to the weakest lever
+- **Read First summary** — a short decision layer that tells the reader what to copy, improve, verify, and inspect first
 - **Awareness Coverage Map** — which of Schwartz's 7 stages the brand actively reaches, and which are gaps
 - **Funnel Journey Diagram** — Mermaid.js flowchart tracing the stranger → advocate pathway
 - **Step-by-step analysis** — per-step What's Working / What's Missing in the style of Daniel Bustamante's FunnelBreakdowns newsletter
 - **Offer stack** — every offer identified with price, type, and target awareness stage
+- **Source links** — deduped public URLs normalized into readable evidence cards
+- **Exports** — download the standalone HTML report, download the structured JSON, or save as PDF from the browser
 - **Open questions** — honest epistemic flags on what couldn't be determined from public data alone
 
-The whole thing runs as a **live web app** with real-time streaming progress (SSE), light/dark mode, and a full-screen report viewer. It also works as a CLI tool for developers.
+The whole thing runs as a **live web app** with real-time streaming progress (SSE), light/dark mode, a product-led homepage, and a full-screen report viewer. It also works as a CLI tool for developers.
 
 **Run modes:** Auto tries the AI pipeline and falls back to the fast scan. Simple mode costs $0 and usually returns in under 2 seconds. AI mode uses the full research pipeline and typically costs a few cents.
 
@@ -61,8 +65,8 @@ Agent 3: Journey Mapper          claude-sonnet-4-6
         │
         ▼
 HTML Renderer                    Pure Python — no LLM, no cost
-  → standalone report with       brand-colored, dark/light mode,
-    Mermaid.js diagrams          self-contained HTML file
+  → standalone report with       scorecard, source links, downloads,
+    Mermaid.js diagrams          brand theme, dark/light mode
 ```
 
 ### Why three agents instead of one?
@@ -95,11 +99,17 @@ The `FunnelMap` model tree (`Brand`, `Touchpoint`, `JourneyStep`, `Offer`, `RunM
 
 **Real-time SSE streaming** — FastAPI background thread pushes agent progress events to the browser via a `queue.Queue`. The async event loop drains the queue without blocking, so the UI updates live as each agent completes
 
+**Game Scorecard** — deterministic scoring layer turns every funnel map into five diagnostic scores: Journey Coverage, Offer Ladder, Conversion Clarity, Evidence Quality, and Retention Loop. The report calls out the weakest lever first so the user knows what to improve.
+
+**Source-linked reports** — the renderer normalizes URLs from brand, touchpoint, step, and offer evidence into a deduped Source Links section. Markdown-style evidence links are cleaned before rendering.
+
+**Downloadable artifacts** — each report includes client-side controls for HTML download, JSON export, and browser print/save-to-PDF. The JSON is embedded as base64 so the report stays portable.
+
 **Brand color theming** — Agent 2 scrapes `<meta name="theme-color">` and `og:image` from the brand homepage. The report renderer uses the extracted hex color as the CSS `--accent` variable, so each report feels visually native to the brand being analyzed
 
 **Security** — all server data inserted into `innerHTML` is HTML-escaped through an `esc()` helper to prevent XSS. API keys live server-side only, never exposed to the client
 
-**Test suite** — 47 tests across models, cost tracker, state cache, all three agents, simple mode, HTML renderer, and CLI integration. Tests are mocked where API calls would otherwise be required.
+**Test suite** — 58 tests across models, cost tracker, state cache, all three agents, simple mode, HTML renderer, web index, and CLI integration. Tests are mocked where API calls would otherwise be required.
 
 **Cost tracking** — `CostTracker` records input/output tokens per agent, computes USD cost using a model pricing table, and reports a full breakdown in the report footer and CLI output
 
@@ -165,7 +175,7 @@ python3 teardown.py "Justin Welsh" --from-cache --agent 3
 
 ```bash
 python3 -m pytest tests/ -v
-# 47 passed, no API calls made
+# 58 passed, no API calls made
 ```
 
 ---
@@ -180,6 +190,18 @@ output/
     funnel_map.json       ← full structured data (FunnelMap Pydantic model)
     teardown_report.html  ← standalone HTML report, no server needed
 ```
+
+The web app also exposes report actions:
+
+- **Download HTML** — save the rendered report as a portable file
+- **Download JSON** — save the structured `FunnelMap` data for reuse
+- **Save PDF** — use the browser print dialog to save a PDF
+
+Example QA reports generated during the latest pass:
+
+- `output/ag1_20260822_151934/teardown_report.html`
+- `output/justin_welsh_20260822_151316/teardown_report.html`
+- `output/morning_brew_20260822_151600/teardown_report.html`
 
 ---
 
@@ -206,6 +228,8 @@ The coverage map in the report shows which stages the brand actively reaches and
 See [`PROGRESS.md`](./PROGRESS.md) for the full checkpoint log and what's coming.
 
 **v2 planned:** Supabase auth (user accounts + run history) + Stripe credit-based billing to offset API costs and capture margin. Free tier → credit packs → subscription tiers.
+
+**Latest update:** frontend and reports now use a calmer native design system, clearer homepage positioning, deterministic scorecards, evidence source cards, and export controls.
 
 ---
 
