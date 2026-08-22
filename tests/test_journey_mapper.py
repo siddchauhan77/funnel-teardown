@@ -167,3 +167,27 @@ def test_map_journey_brunson_fields_parsed():
     assert len(step.story) > 0
     assert len(step.offer_cta) > 0
     assert "YouTube" in state.funnel_map.ascension_path
+
+
+def test_map_journey_normalizes_common_model_labels():
+    """Model can say social/course; mapper should normalize into schema labels."""
+    state = _state_with_brand_and_touchpoints()
+    tracker = CostTracker()
+
+    payload = json.loads(JOURNEY_JSON)
+    payload["journey_steps"][0]["type"] = "social"
+    payload["journey_steps"][1]["type"] = "sales_page"
+    payload["offers"][0]["type"] = "course"
+
+    mock_response = MagicMock()
+    mock_response.content = [MagicMock(text=json.dumps(payload))]
+    mock_response.usage.input_tokens = 3000
+    mock_response.usage.output_tokens = 1500
+
+    with patch("agents.journey_mapper._get_client") as mock_get_client:
+        mock_get_client.return_value.messages.create.return_value = mock_response
+        map_journey(state, tracker)
+
+    assert state.funnel_map.journey_steps[0].type == "content"
+    assert state.funnel_map.journey_steps[1].type == "landing_page"
+    assert state.funnel_map.offers[0].type == "core_product"

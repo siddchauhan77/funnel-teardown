@@ -29,6 +29,86 @@ def _strip_json_fences(text: str) -> str:
     return text
 
 
+STEP_TYPE_MAP = {
+    "ad": "content",
+    "ads": "content",
+    "advertising": "content",
+    "article": "content",
+    "blog": "content",
+    "community": "onboarding",
+    "course": "checkout",
+    "demo": "call",
+    "event": "live_event",
+    "homepage": "landing_page",
+    "newsletter": "email_sequence",
+    "podcast": "content",
+    "pricing": "checkout",
+    "product_page": "landing_page",
+    "sales": "checkout",
+    "sales_page": "landing_page",
+    "social": "content",
+    "social_media": "content",
+    "webinar": "live_event",
+    "website": "landing_page",
+    "youtube": "content",
+}
+
+OFFER_TYPE_MAP = {
+    "book": "low_ticket",
+    "call": "high_ticket",
+    "coaching": "high_ticket",
+    "community": "subscription",
+    "course": "core_product",
+    "digital_product": "core_product",
+    "event": "high_ticket",
+    "free": "lead_magnet",
+    "membership": "subscription",
+    "newsletter": "lead_magnet",
+    "paid_newsletter": "subscription",
+    "program": "core_product",
+    "saas": "subscription",
+    "service": "high_ticket",
+    "workshop": "low_ticket",
+}
+
+VALID_STEP_TYPES = {
+    "content", "landing_page", "lead_magnet", "email_sequence",
+    "thank_you_page", "call", "checkout", "onboarding", "referral",
+    "live_event", "other",
+}
+
+VALID_OFFER_TYPES = {
+    "lead_magnet", "free_trial", "low_ticket", "core_product",
+    "upsell", "subscription", "high_ticket", "other",
+}
+
+
+def _norm_token(value: str) -> str:
+    return str(value or "").strip().lower().replace("-", "_").replace(" ", "_")
+
+
+def _normalize_journey_payload(data: dict) -> dict:
+    """Normalize common model labels before Pydantic validation."""
+    for step in data.get("journey_steps", []):
+        raw = _norm_token(step.get("type", "other"))
+        mapped = STEP_TYPE_MAP.get(raw, raw)
+        step["type"] = mapped if mapped in VALID_STEP_TYPES else "other"
+
+        rung = _norm_token(step.get("value_ladder_rung", "free"))
+        if rung in {"low_ticket", "tripwire"}:
+            rung = "entry"
+        if rung not in {"free", "entry", "core", "high_ticket", "continuity"}:
+            rung = "free"
+        step["value_ladder_rung"] = rung
+
+    for offer in data.get("offers", []):
+        raw = _norm_token(offer.get("type", "other"))
+        mapped = OFFER_TYPE_MAP.get(raw, raw)
+        offer["type"] = mapped if mapped in VALID_OFFER_TYPES else "other"
+
+    return data
+
+
 def _map_with_gpt(user_message: str, tracker: CostTracker) -> dict:
     """Fallback: call GPT-4o when Anthropic is unavailable."""
     response = _get_openai_client().chat.completions.create(
@@ -248,6 +328,8 @@ def map_journey(state: TeardownState, tracker: CostTracker) -> None:
     except Exception:
         # Claude unavailable (low credits, bad key, rate limit) — fall back to GPT-4o
         data = _map_with_gpt(user_message, tracker)
+
+    data = _normalize_journey_payload(data)
 
     state.funnel_map.journey_steps = [JourneyStep(**s) for s in data["journey_steps"]]
     state.funnel_map.offers = [Offer(**o) for o in data["offers"]]
