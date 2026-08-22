@@ -226,7 +226,8 @@
       margin-left: 6px;
     }
 
-    input[type="text"] {
+    input[type="text"],
+    select {
       width: 100%;
       background: var(--bg);
       border: 1px solid var(--border2);
@@ -239,7 +240,9 @@
       transition: border-color 0.15s;
     }
     input[type="text"]::placeholder { color: var(--muted); }
-    input[type="text"]:focus { border-color: var(--accent); }
+    input[type="text"]:focus,
+    select:focus { border-color: var(--accent); }
+    select { appearance: none; cursor: pointer; }
 
     .hints-toggle {
       display: flex;
@@ -853,7 +856,7 @@
 
   <div class="home-main">
     <div class="home-badge">
-      <span>●</span> AI-Powered Funnel Research
+      <span>●</span> Funnel Research System
     </div>
 
     <h1 class="home-title">
@@ -862,8 +865,8 @@
     </h1>
 
     <p class="home-sub">
-      Drop a brand name. Get a full stranger→advocate funnel map
-      with What's Working / What's Missing analysis. Under $0.50.
+      Drop a brand name. Get a stranger→advocate funnel map
+      with What's Working / What's Missing analysis. Fast scan or full AI research.
     </p>
 
     <div class="form-card">
@@ -882,9 +885,21 @@
         <div class="field">
           <label for="urlInput">
             Website URL
-            <span class="field-opt">recommended — improves brand colors &amp; accuracy</span>
+            <span class="field-opt">recommended for fast mode and accuracy</span>
           </label>
           <input type="text" id="urlInput" placeholder="ag1.com or justinwelsh.me">
+        </div>
+
+        <div class="field">
+          <label for="modeInput">
+            Run mode
+            <span class="field-opt">auto is safest</span>
+          </label>
+          <select id="modeInput">
+            <option value="auto" selected>Auto: AI research, fallback to fast scan</option>
+            <option value="simple">Fast scan: homepage-only, no API cost</option>
+            <option value="ai">AI research: full model-backed run</option>
+          </select>
         </div>
 
         <button type="button" class="hints-toggle" id="hintsToggle">
@@ -924,7 +939,7 @@
 <div class="view view-running">
   <div class="running-header">
     <div class="running-brand" id="runningBrandName">Analyzing…</div>
-    <div class="running-sub">3 AI agents are working — this takes about 30–60 seconds</div>
+    <div class="running-sub" id="runningSub">Auto mode tries AI research first and falls back to a fast homepage scan if needed.</div>
   </div>
 
   <div class="agents-list">
@@ -1305,6 +1320,7 @@
     document.getElementById('brandInput').value = '';
     document.getElementById('urlInput').value = '';
     document.getElementById('founderInput').value = '';
+    document.getElementById('modeInput').value = 'auto';
     document.getElementById('submitBtn').disabled = false;
   }
 
@@ -1333,8 +1349,9 @@
     if (!brand) return;
     const founder = document.getElementById('founderInput').value.trim();
     const url = document.getElementById('urlInput').value.trim();
+    const mode = document.getElementById('modeInput').value;
     document.getElementById('submitBtn').disabled = true;
-    startAnalysis(brand, founder, url);
+    startAnalysis(brand, founder, url, mode);
   });
 
   // ── Progress helpers ─────────────────────────────────────────────
@@ -1418,15 +1435,21 @@
   }
 
   // ── Main analysis ────────────────────────────────────────────────
-  function startAnalysis(brand, founder, url) {
+  function startAnalysis(brand, founder, url, mode) {
     resetProgress();
     setView('running');
     document.getElementById('runningBrandName').textContent = 'Analyzing "' + brand + '"…';
+    document.getElementById('runningSub').textContent =
+      mode === 'simple'
+        ? 'Fast scan mode uses the homepage and visible links. No API cost.'
+        : mode === 'ai'
+          ? 'AI research mode uses the full model-backed pipeline.'
+          : 'Auto mode tries AI research first and falls back to a fast homepage scan if needed.';
 
     fetch('/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ brand: brand, founder: founder, url: url }),
+      body: JSON.stringify({ brand: brand, founder: founder, url: url, mode: mode }),
     }).then(function (response) {
       if (!response.ok) {
         showError('Server error: ' + response.status, '');

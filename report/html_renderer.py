@@ -3,6 +3,7 @@ HTML Report Renderer — pure Python, no LLM.
 Converts FunnelMap -> standalone dark-mode HTML report with Mermaid.js diagrams.
 Design: dark professional SaaS (Linear/Notion aesthetic) — FunnelTeardown brand.
 """
+from html import escape
 from models.funnel_map import FunnelMap
 
 # Awareness level color system — kept consistent throughout
@@ -72,6 +73,11 @@ def _al(obj) -> str:
     return obj.value if hasattr(obj, "value") else str(obj)
 
 
+def _e(value) -> str:
+    """Escape dynamic text before inserting into report HTML."""
+    return escape(str(value or ""), quote=True)
+
+
 def _conf_badge(conf: str) -> str:
     color_map = {"high": "#22C55E", "medium": "#F59E0B", "low": "#EF4444"}
     c = color_map.get(str(conf), "#94A3B8")
@@ -80,7 +86,7 @@ def _conf_badge(conf: str) -> str:
         f'font-size:11px;font-weight:500;color:{c};'
         f'background:{c}22;padding:2px 8px;border-radius:20px;">'
         f'<span style="width:5px;height:5px;border-radius:50%;background:{c};display:inline-block;"></span>'
-        f'{conf} confidence</span>'
+        f'{_e(conf)} confidence</span>'
     )
 
 
@@ -101,15 +107,20 @@ def _mermaid_flowchart(steps: list) -> str:
         al = _al(step.awareness_level)
         al_text = AL_LABEL.get(al, al)
         suffix = "" if step.is_observed else " ◦"
-        lines.append(f'    {step.id}["{label}\\n{al_text}{suffix}"]')
+        lines.append(f'    {_mermaid_id(step.id)}["{label}\\n{al_text}{suffix}"]')
     for step in steps:
         for exit_id in step.exits_to:
-            lines.append(f"    {step.id} --> {exit_id}")
+            lines.append(f"    {_mermaid_id(step.id)} --> {_mermaid_id(exit_id)}")
     for step in steps:
         al = _al(step.awareness_level)
         c = AL_COLOR.get(al, "#94A3B8")
-        lines.append(f"    style {step.id} fill:{c}33,stroke:{c},stroke-width:2px,color:#F1F5F9")
+        lines.append(f"    style {_mermaid_id(step.id)} fill:{c}33,stroke:{c},stroke-width:2px,color:#F1F5F9")
     return "\n".join(lines)
+
+
+def _mermaid_id(value: str) -> str:
+    clean = "".join(c if c.isalnum() or c == "_" else "_" for c in str(value or "step"))
+    return clean or "step"
 
 
 def _coverage_grid(fm: FunnelMap) -> str:
@@ -130,11 +141,11 @@ def _coverage_grid(fm: FunnelMap) -> str:
 
         if filled:
             items = "".join(
-                f'<a href="{t.url}" target="_blank" style="display:block;color:#94A3B8;'
+                f'<a href="{_e(t.url)}" target="_blank" style="display:block;color:#94A3B8;'
                 f'font-size:12px;text-decoration:none;margin-top:4px;'
                 f'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" '
-                f'title="{t.handle_or_name}">'
-                f'<span style="color:{color};">▸</span> {t.handle_or_name}</a>'
+                f'title="{_e(t.handle_or_name)}">'
+                f'<span style="color:{color};">▸</span> {_e(t.handle_or_name)}</a>'
                 for t in touchpoints
             )
         else:
@@ -146,7 +157,7 @@ def _coverage_grid(fm: FunnelMap) -> str:
             f'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
             f'<span style="width:8px;height:8px;border-radius:50%;background:{color};flex-shrink:0;"></span>'
             f'<span style="font-size:12px;font-weight:600;color:{color};text-transform:uppercase;'
-            f'letter-spacing:0.05em;">{label}</span>'
+            f'letter-spacing:0.05em;">{_e(label)}</span>'
             f'</div>'
             f'{items}'
             f'</div>'
@@ -175,24 +186,24 @@ def _step_cards(steps: list) -> str:
         hso_html = _hso_row(step.hook or "", step.story or "", step.offer_cta or "")
 
         working_items = "".join(
-            f'<li style="margin-bottom:6px;padding-left:4px;">{w}</li>'
+            f'<li style="margin-bottom:6px;padding-left:4px;">{_e(w)}</li>'
             for w in step.whats_working
         ) or '<li style="color:#4B5563;">—</li>'
 
         missing_items = "".join(
-            f'<li style="margin-bottom:6px;padding-left:4px;">{m}</li>'
+            f'<li style="margin-bottom:6px;padding-left:4px;">{_e(m)}</li>'
             for m in step.whats_missing
         ) or '<li style="color:#4B5563;">—</li>'
 
         evidence_links = " ".join(
-            f'<a href="{e}" target="_blank" style="color:#3B82F6;font-size:11px;'
+            f'<a href="{_e(e)}" target="_blank" style="color:#3B82F6;font-size:11px;'
             f'text-decoration:none;padding:2px 6px;background:#3B82F611;border-radius:4px;">'
             f'source {j+1}</a>'
             for j, e in enumerate(step.evidence)
         )
 
         exits = ", ".join(f'<code style="background:#1E2333;padding:1px 5px;border-radius:3px;'
-                          f'font-size:11px;color:#94A3B8;">{e}</code>'
+                          f'font-size:11px;color:#94A3B8;">{_e(e)}</code>'
                           for e in step.exits_to) or "—"
 
         cards.append(f"""
@@ -208,14 +219,14 @@ def _step_cards(steps: list) -> str:
       <div>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
           <span style="font-size:11px;font-weight:600;letter-spacing:0.08em;
-               text-transform:uppercase;color:{color};">{al_label}</span>
+               text-transform:uppercase;color:{color};">{_e(al_label)}</span>
           <span style="color:#374151;font-size:11px;">·</span>
-          <span style="font-size:11px;color:#64748B;">{type_v.replace("_"," ")}</span>
+          <span style="font-size:11px;color:#64748B;">{_e(type_v.replace("_"," "))}</span>
           <span style="color:#374151;font-size:11px;">·</span>
           {vl_badge}
         </div>
         <h3 style="margin:4px 0 0;font-size:15px;font-weight:600;color:#F1F5F9;line-height:1.3;">
-          {step.label}
+          {_e(step.label)}
         </h3>
       </div>
     </div>
@@ -226,7 +237,7 @@ def _step_cards(steps: list) -> str:
   </div>
 
   <div style="padding:16px 20px;">
-    <p style="color:#94A3B8;font-size:14px;margin:0 0 16px;line-height:1.6;">{step.description}</p>
+    <p style="color:#94A3B8;font-size:14px;margin:0 0 16px;line-height:1.6;">{_e(step.description)}</p>
 
     {hso_html}
 
@@ -283,23 +294,23 @@ def _offers_section(fm: FunnelMap) -> str:
      gap:16px;flex-wrap:wrap;margin-bottom:12px;">
   <div style="flex:1;min-width:200px;">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
-      <span style="font-size:13px;font-weight:700;color:#F1F5F9;">{o.name}</span>
+      <span style="font-size:13px;font-weight:700;color:#F1F5F9;">{_e(o.name)}</span>
       <span style="font-size:11px;color:#64748B;background:#1E2333;padding:2px 8px;
-           border-radius:4px;">{type_v.replace("_"," ")}</span>
+           border-radius:4px;">{_e(type_v.replace("_"," "))}</span>
       {_observed_badge(o.is_observed)}
     </div>
     <p style="margin:0 0 8px;color:#94A3B8;font-size:13px;font-style:italic;line-height:1.5;">
-      "{o.headline_or_promise}"
+      "{_e(o.headline_or_promise)}"
     </p>
     <div style="font-size:12px;color:#4B5563;">
       Connected to: <code style="background:#1E2333;padding:1px 5px;border-radius:3px;
-      color:#94A3B8;">{o.connected_step_id}</code>
+      color:#94A3B8;">{_e(o.connected_step_id)}</code>
     </div>
   </div>
   <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
     <div style="font-size:24px;font-weight:700;color:#F1F5F9;">{price}</div>
     <span style="font-size:11px;font-weight:600;color:{color};background:{bg};
-         padding:4px 10px;border-radius:20px;border:1px solid {color}33;">{al_label}</span>
+         padding:4px 10px;border-radius:20px;border:1px solid {color}33;">{_e(al_label)}</span>
     {_conf_badge(conf_v)}
   </div>
 </div>""")
@@ -331,7 +342,7 @@ def _value_ladder_bar(steps: list, ascension_path: str) -> str:
             f'border:{border};border-radius:8px;">'
             f'<div style="font-size:11px;font-weight:600;color:{text_color};'
             f'display:flex;align-items:center;justify-content:center;">'
-            f'{dot}{label}</div></div>'
+            f'{dot}{_e(label)}</div></div>'
         )
     arrow = '<div style="color:#374151;font-size:14px;align-self:center;flex-shrink:0;">→</div>'
     ladder_html = arrow.join(rung_cells)
@@ -340,7 +351,7 @@ def _value_ladder_bar(steps: list, ascension_path: str) -> str:
         f'<div style="margin-top:12px;padding:12px 16px;background:#13151F;border:1px solid #1E2333;'
         f'border-radius:8px;font-size:13px;color:#94A3B8;font-style:italic;line-height:1.5;">'
         f'<span style="font-size:11px;font-weight:600;color:#4B5563;text-transform:uppercase;'
-        f'letter-spacing:0.06em;font-style:normal;">Ascension Path → </span>{ascension_path}</div>'
+        f'letter-spacing:0.06em;font-style:normal;">Ascension Path → </span>{_e(ascension_path)}</div>'
         if ascension_path else ""
     )
 
@@ -362,7 +373,7 @@ def _hso_row(hook: str, story: str, offer_cta: str) -> str:
             f'<div style="font-size:11px;font-weight:600;color:{accent};margin-bottom:6px;'
             f'display:flex;align-items:center;gap:5px;text-transform:uppercase;letter-spacing:0.06em;">'
             f'<span>{icon}</span>{title}</div>'
-            f'<p style="margin:0;font-size:13px;color:#94A3B8;line-height:1.5;">{body_text}</p>'
+            f'<p style="margin:0;font-size:13px;color:#94A3B8;line-height:1.5;">{body_text if body_text.startswith("<span") else _e(body_text)}</p>'
             f'</div>'
         )
 
@@ -391,7 +402,7 @@ def _recap_section(worth_stealing: list, learning_opportunities: list) -> str:
         f'<div style="background:#0C1A0F;border:1px solid #166534;border-radius:10px;'
         f'padding:16px 18px;display:flex;gap:14px;align-items:flex-start;">'
         f'<span style="font-size:18px;flex-shrink:0;">✦</span>'
-        f'<p style="margin:0;color:#D1FAE5;font-size:14px;line-height:1.6;">{t}</p>'
+        f'<p style="margin:0;color:#D1FAE5;font-size:14px;line-height:1.6;">{_e(t)}</p>'
         f'</div>'
         for t in worth_stealing
     ) or '<p style="color:#4B5563;font-size:14px;">—</p>'
@@ -400,7 +411,7 @@ def _recap_section(worth_stealing: list, learning_opportunities: list) -> str:
         f'<div style="background:#1A0E06;border:1px solid #92400E;border-radius:10px;'
         f'padding:16px 18px;display:flex;gap:14px;align-items:flex-start;">'
         f'<span style="font-size:18px;flex-shrink:0;">⚠</span>'
-        f'<p style="margin:0;color:#FDE68A;font-size:14px;line-height:1.6;">{l}</p>'
+        f'<p style="margin:0;color:#FDE68A;font-size:14px;line-height:1.6;">{_e(l)}</p>'
         f'</div>'
         for l in learning_opportunities
     ) or '<p style="color:#4B5563;font-size:14px;">—</p>'
@@ -432,7 +443,7 @@ def _open_questions_section(questions: list) -> str:
     items = "".join(
         f'<li style="margin-bottom:12px;padding:14px 16px;background:#13151F;'
         f'border:1px solid #1E2333;border-left:3px solid #3B82F6;border-radius:0 8px 8px 0;'
-        f'color:#94A3B8;font-size:14px;line-height:1.6;">{q}</li>'
+        f'color:#94A3B8;font-size:14px;line-height:1.6;">{_e(q)}</li>'
         for q in questions
     )
     return f'<ol style="padding-left:24px;list-style:decimal;">{items}</ol>'
@@ -467,17 +478,17 @@ def render_html(fm: FunnelMap) -> str:
 
     agent_rows = "".join(
         f'<tr style="border-bottom:1px solid #1E2333;">'
-        f'<td style="padding:10px 16px;color:#94A3B8;font-size:13px;">{agent}</td>'
+        f'<td style="padding:10px 16px;color:#94A3B8;font-size:13px;">{_e(agent)}</td>'
         f'<td style="padding:10px 16px;color:#64748B;font-size:12px;">'
         f'<code style="background:#1E2333;padding:2px 6px;border-radius:4px;">'
-        f'{meta.model_used.get(agent, "—")}</code></td>'
+            f'{_e(meta.model_used.get(agent, "—"))}</code></td>'
         f'<td style="padding:10px 16px;color:#22C55E;font-size:13px;font-weight:500;">'
         f'${cost:.4f}</td></tr>'
         for agent, cost in meta.agent_costs.items()
     )
 
     evidence_links = " ".join(
-        f'<a href="{e}" target="_blank" style="color:#3B82F6;font-size:12px;'
+        f'<a href="{_e(e)}" target="_blank" style="color:#3B82F6;font-size:12px;'
         f'text-decoration:none;">[{i+1}]</a>'
         for i, e in enumerate(brand.evidence)
     ) or "—"
@@ -485,12 +496,12 @@ def render_html(fm: FunnelMap) -> str:
     founder_row = (
         f'<div class="brand-row">'
         f'<span class="brand-row-label">Founder</span>'
-        f'<span class="brand-row-value">{brand.founder}</span></div>'
+        f'<span class="brand-row-value">{_e(brand.founder)}</span></div>'
         if brand.founder else ""
     )
 
     logo_html = (
-        f'<img src="{brand.logo_url}" alt="{brand.name} logo" '
+        f'<img src="{_e(brand.logo_url)}" alt="{_e(brand.name)} logo" '
         f'style="max-height:48px;max-width:120px;object-fit:contain;'
         f'border-radius:8px;margin-bottom:12px;">'
         if brand.logo_url else ""
@@ -503,7 +514,7 @@ def render_html(fm: FunnelMap) -> str:
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FunnelTeardown — {brand.name}</title>
+  <title>FunnelTeardown — {_e(brand.name)}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -873,11 +884,11 @@ def render_html(fm: FunnelMap) -> str:
   <div class="topbar-left">
     <span class="topbar-logo">FunnelTeardown</span>
     <div class="topbar-divider"></div>
-    <span class="topbar-brand">{brand.name}</span>
+    <span class="topbar-brand">{_e(brand.name)}</span>
   </div>
   <div class="topbar-right">
     <span class="pill pill-cost">&#36;{meta.total_cost_usd:.4f}</span>
-    <span class="pill pill-time">{meta.timestamp[:10]}</span>
+    <span class="pill pill-time">{_e(meta.timestamp[:10])}</span>
     <span class="pill pill-time">{duration_str}</span>
     <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark mode">☀︎</button>
   </div>
@@ -927,21 +938,21 @@ def render_html(fm: FunnelMap) -> str:
     <div class="section-header">
       <div class="section-icon">🏷</div>
       <span class="section-title">Brand Overview</span>
-      <span class="section-count">{conf_v} confidence</span>
+      <span class="section-count">{_e(conf_v)} confidence</span>
     </div>
     <div class="brand-card">
       {logo_html}
-      <div class="brand-name">{brand.name}</div>
-      <a href="{brand.website}" target="_blank" class="brand-website">{brand.website}</a>
+      <div class="brand-name">{_e(brand.name)}</div>
+      <a href="{_e(brand.website)}" target="_blank" class="brand-website">{_e(brand.website)}</a>
       <div class="brand-meta">
         {founder_row}
         <div class="brand-row">
           <span class="brand-row-label">Description</span>
-          <span class="brand-row-value">{brand.description}</span>
+          <span class="brand-row-value">{_e(brand.description)}</span>
         </div>
         <div class="brand-row">
           <span class="brand-row-label">Primary ICP</span>
-          <span class="brand-row-value">{brand.primary_icp}</span>
+          <span class="brand-row-value">{_e(brand.primary_icp)}</span>
         </div>
         <div class="brand-row">
           <span class="brand-row-label">Sources</span>
@@ -970,7 +981,7 @@ def render_html(fm: FunnelMap) -> str:
     </div>
     <p class="section-desc">Stranger → Advocate pathway. Solid border = observed. Dashed = inferred.</p>
     <div class="mermaid-wrap">
-      <div class="mermaid">{flowchart}</div>
+      <div class="mermaid">{_e(flowchart)}</div>
     </div>
   </section>
 
@@ -1048,7 +1059,7 @@ def render_html(fm: FunnelMap) -> str:
     <p style="margin-top:12px;font-size:12px;color:#374151;">
       Total: <strong style="color:#22C55E;">{cost_str}</strong>
       &nbsp;·&nbsp; Runtime: {duration_str}
-      &nbsp;·&nbsp; Generated: {meta.timestamp}
+      &nbsp;·&nbsp; Generated: {_e(meta.timestamp)}
     </p>
   </section>
 
@@ -1058,7 +1069,7 @@ def render_html(fm: FunnelMap) -> str:
      font-size:12px;color:#374151;">
   Generated by <a href="https://funnelteardownai.up.railway.app" target="_blank"
   style="color:#4B5563;text-decoration:none;font-weight:600;">FunnelTeardown AI</a>
-  &nbsp;·&nbsp; Input: "{meta.brand_input}"
+  &nbsp;·&nbsp; Input: "{_e(meta.brand_input)}"
 </footer>
 
 <script>

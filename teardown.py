@@ -8,7 +8,9 @@ from datetime import datetime
 from pathlib import Path
 
 from dotenv import load_dotenv
-load_dotenv()  # Must run before agent imports so API keys are in os.environ
+
+ROOT_DIR = Path(__file__).resolve().parent
+load_dotenv(ROOT_DIR / ".env")  # Must run before agent imports so API keys are in os.environ
 
 from rich.console import Console
 from rich.table import Table
@@ -16,6 +18,7 @@ from rich.table import Table
 from agents.brand_resolver import resolve_brand
 from agents.touchpoint_mapper import map_touchpoints
 from agents.journey_mapper import map_journey
+from agents.simple_mapper import run_simple_analysis
 from report.html_renderer import render_html
 from state.teardown_state import TeardownState, slug_for
 from utils.cost_tracker import CostTracker
@@ -25,7 +28,8 @@ console = Console()
 
 
 def run_teardown(brand_name: str, hints: dict,
-                 from_cache: bool = False, start_agent: int = 1) -> None:
+                 from_cache: bool = False, start_agent: int = 1,
+                 mode: str = "ai") -> None:
     """Run the full teardown pipeline for a brand."""
     start_time = time.time()
     tracker = CostTracker()
@@ -38,6 +42,33 @@ def run_teardown(brand_name: str, hints: dict,
             console.print(f"[yellow]No cache found for '{brand_name}'. Starting fresh.[/yellow]")
     if state is None:
         state = TeardownState.new(brand_name, hints=hints)
+
+    if mode == "simple":
+        with console.status("[bold blue]Simple mapper: Scanning homepage...[/bold blue]"):
+            run_simple_analysis(state, tracker)
+        console.print(
+            f"[green]✓[/green] Simple report built: "
+            f"{len(state.funnel_map.journey_steps)} steps, "
+            f"{len(state.funnel_map.offers)} offers "
+            f"[dim]$0.0000[/dim]"
+        )
+    else:
+        try:
+            _run_ai_agents(state, tracker, start_agent)
+        except Exception as e:
+            if mode != "auto":
+                raise
+            console.print(f"[yellow]AI pipeline failed: {e}[/yellow]")
+            console.print("[yellow]Falling back to simple homepage scan.[/yellow]")
+            tracker = CostTracker()
+            state = TeardownState.new(brand_name, hints=hints)
+            run_simple_analysis(state, tracker)
+
+    _write_outputs(state, tracker, brand_name, start_time)
+
+
+def _run_ai_agents(state: TeardownState, tracker: CostTracker, start_agent: int) -> None:
+    """Run the model-backed agent pipeline."""
 
     # Agent 1: Brand Resolver
     if start_agent <= 1:
@@ -76,6 +107,10 @@ def run_teardown(brand_name: str, hints: dict,
             f"[dim]{cost3}[/dim]"
         )
 
+
+def _write_outputs(state: TeardownState, tracker: CostTracker,
+                   brand_name: str, start_time: float) -> None:
+    """Finalize metadata and write JSON + HTML report."""
     # Finalize metadata
     duration = time.time() - start_time
     state.funnel_map.run_metadata.timestamp = datetime.now().isoformat()
@@ -118,6 +153,8 @@ def main() -> None:
                         help="Load cached state from .tmp/ instead of re-running Agent 1+2")
     parser.add_argument("--agent", type=int, default=1,
                         help="Start from this agent number (1-3). Use with --from-cache.")
+    parser.add_argument("--mode", choices=["auto", "ai", "simple"], default="auto",
+                        help="auto = try AI then fall back to simple. ai = model-backed agents. simple = homepage-only deterministic report.")
     args = parser.parse_args()
 
     hints: dict = {}
@@ -131,7 +168,8 @@ def main() -> None:
             args.brand,
             hints=hints,
             from_cache=args.from_cache,
-            start_agent=args.agent
+            start_agent=args.agent,
+            mode=args.mode,
         )
     except ValueError as e:
         console.print(f"[red]Error:[/red] {e}")

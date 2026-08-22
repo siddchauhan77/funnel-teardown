@@ -1,6 +1,6 @@
 # FunnelTeardown AI
 
-**Reverse-engineer any brand's customer acquisition funnel using a multi-agent AI pipeline. Drop a brand name, get a full structured report in under 60 seconds for under $0.50.**
+**Reverse-engineer any brand's customer acquisition funnel using either a fast homepage scan or a multi-agent AI pipeline. Drop a brand name, get a structured stranger-to-advocate report.**
 
 🔗 **[Try it live → funnelteardownai.up.railway.app](https://funnelteardownai.up.railway.app)**
 &nbsp;&nbsp;|&nbsp;&nbsp;
@@ -28,7 +28,7 @@ A three-agent AI pipeline that takes a brand name as input and returns:
 
 The whole thing runs as a **live web app** with real-time streaming progress (SSE), light/dark mode, and a full-screen report viewer. It also works as a CLI tool for developers.
 
-**Cost per run: $0.15–0.35. Runtime: 30–60 seconds.**
+**Run modes:** Auto tries the AI pipeline and falls back to the fast scan. Simple mode costs $0 and usually returns in under 2 seconds. AI mode uses the full research pipeline and typically costs a few cents.
 
 ---
 
@@ -36,6 +36,12 @@ The whole thing runs as a **live web app** with real-time streaming progress (SS
 
 ```
 User Input (brand + website)
+        │
+        ▼
+Mode Router
+  → auto: try AI, fallback to simple
+  → simple: homepage scan only
+  → ai: full model-backed pipeline
         │
         ▼
 Agent 1: Brand Resolver          gpt-4o-mini-search-preview
@@ -65,6 +71,10 @@ The tasks have different cost/quality profiles. Brand resolution and touchpoint 
 
 Each agent writes to a shared `TeardownState` (Pydantic model) cached to `.tmp/` as JSON. Any single agent can be re-run in isolation without repeating the others — critical during development and useful when iterating on the journey mapping prompt without paying for web search again.
 
+### Why add simple mode?
+
+The product should produce a useful report even when a model provider is slow, credits are low, or a brand blocks scraping. Simple mode scans the homepage and visible links, then builds a clearly labeled first-pass funnel map with observed versus inferred steps. It is not as deep as AI mode, but it gives the user an immediate report and a baseline to upgrade later with OpenAI, Anthropic, or an open-source model.
+
 ### Why Railway instead of Vercel?
 
 The pipeline takes 30–60 seconds. Vercel's free tier kills serverless functions at 10 seconds. Railway runs a persistent Python process with no timeout ceiling. The `Procfile` + `railway.toml` config is already in the repo — one-command deploy.
@@ -89,7 +99,7 @@ The `FunnelMap` model tree (`Brand`, `Touchpoint`, `JourneyStep`, `Offer`, `RunM
 
 **Security** — all server data inserted into `innerHTML` is HTML-escaped through an `esc()` helper to prevent XSS. API keys live server-side only, never exposed to the client
 
-**Test suite** — 42 tests across models, cost tracker, state cache, all three agents (fully mocked — no real API calls), HTML renderer, and CLI integration. Tests enforce the `response.output` iteration contract so any SDK change that breaks the parsing fails immediately
+**Test suite** — 47 tests across models, cost tracker, state cache, all three agents, simple mode, HTML renderer, and CLI integration. Tests are mocked where API calls would otherwise be required.
 
 **Cost tracking** — `CostTracker` records input/output tokens per agent, computes USD cost using a model pricing table, and reports a full breakdown in the report footer and CLI output
 
@@ -133,8 +143,9 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 ```bash
 python3 teardown.py "Athletic Greens" --url ag1.com
-python3 teardown.py "Justin Welsh" --url justinwelsh.me
-python3 teardown.py "Alex Hormozi" --founder "Alex Hormozi"
+python3 teardown.py "Justin Welsh" --url justinwelsh.me --mode auto
+python3 teardown.py "Alex Hormozi" --founder "Alex Hormozi" --mode ai
+python3 teardown.py "AG1" --url ag1.com --mode simple
 ```
 
 **Run the web app locally:**
@@ -154,7 +165,7 @@ python3 teardown.py "Justin Welsh" --from-cache --agent 3
 
 ```bash
 python3 -m pytest tests/ -v
-# 42 passed, no API calls made
+# 47 passed, no API calls made
 ```
 
 ---

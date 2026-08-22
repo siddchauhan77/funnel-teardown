@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import AsyncGenerator
 
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, StreamingResponse
@@ -30,6 +30,7 @@ from pydantic import BaseModel
 from agents.brand_resolver import resolve_brand
 from agents.touchpoint_mapper import map_touchpoints
 from agents.journey_mapper import map_journey
+from agents.simple_mapper import run_simple_analysis
 from report.html_renderer import render_html
 from state.teardown_state import TeardownState
 from utils.cost_tracker import CostTracker
@@ -111,6 +112,7 @@ class AnalyzeRequest(BaseModel):
     brand: str
     founder: str = ""
     url: str = ""
+    mode: str = "auto"
 
 
 @app.post("/analyze")
@@ -137,7 +139,7 @@ async def analyze(req: AnalyzeRequest, request: Request):
     q: "queue.Queue[dict | None]" = queue.Queue()
 
     def worker():
-        _run_pipeline(req.brand.strip(), hints, q, remaining)
+        _run_pipeline(req.brand.strip(), hints, q, remaining, req.mode)
         q.put(None)  # sentinel — stream ends
 
     threading.Thread(target=worker, daemon=True).start()
@@ -155,10 +157,16 @@ async def analyze(req: AnalyzeRequest, request: Request):
 
 # ─── Pipeline ────────────────────────────────────────────────────────────────
 
-def _run_pipeline(brand: str, hints: dict, q: queue.Queue, remaining: int = 0) -> None:
+def _run_pipeline(brand: str, hints: dict, q: queue.Queue,
+                  remaining: int = 0, mode: str = "auto") -> None:
     """Run the 3-agent pipeline in a background thread, push SSE dicts to q."""
     import time
     start = time.time()
+
+    mode = mode if mode in {"auto", "ai", "simple"} else "auto"
+    if mode == "simple":
+        _run_simple_pipeline(brand, hints, q, remaining, start)
+        return
 
     state = TeardownState.new(brand, hints=hints)
     tracker = CostTracker()
@@ -179,10 +187,16 @@ def _run_pipeline(brand: str, hints: dict, q: queue.Queue, remaining: int = 0) -
                    "cost": round(tracker.agent_cost("brand_resolver"), 5),
                }})
     except ValueError as e:
+        if mode == "auto":
+            _run_simple_pipeline(brand, hints, q, remaining, start, reason=str(e))
+            return
         q.put({"type": "error", "message": str(e),
                "hint": "Try adding --url or --founder to disambiguate."})
         return
     except Exception as e:
+        if mode == "auto":
+            _run_simple_pipeline(brand, hints, q, remaining, start, reason=str(e))
+            return
         err = str(e)
         print(f"[brand_resolver error] {err}", flush=True)
         if "credit" in err.lower() or "billing" in err.lower():
@@ -212,6 +226,9 @@ def _run_pipeline(brand: str, hints: dict, q: queue.Queue, remaining: int = 0) -
                    "cost": round(tracker.agent_cost("touchpoint_mapper"), 5),
                }})
     except Exception as e:
+        if mode == "auto":
+            _run_simple_pipeline(brand, hints, q, remaining, start, reason=str(e))
+            return
         err = str(e)
         print(f"[touchpoint_mapper error] {err}", flush=True)
         if "credit" in err.lower() or "billing" in err.lower():
@@ -237,6 +254,9 @@ def _run_pipeline(brand: str, hints: dict, q: queue.Queue, remaining: int = 0) -
                    "cost": round(tracker.agent_cost("journey_mapper"), 5),
                }})
     except Exception as e:
+        if mode == "auto":
+            _run_simple_pipeline(brand, hints, q, remaining, start, reason=str(e))
+            return
         err = str(e)
         if "credit balance is too low" in err or "billing" in err.lower():
             q.put({"type": "error",
@@ -281,6 +301,79 @@ def _run_pipeline(brand: str, hints: dict, q: queue.Queue, remaining: int = 0) -
         "report_id": report_id,
         "brand": state.funnel_map.brand.name,
         "cost": round(tracker.total_cost(), 4),
+        "duration": round(duration, 1),
+        "remaining": remaining,
+    })
+
+
+def _run_simple_pipeline(brand: str, hints: dict, q: queue.Queue,
+                         remaining: int, start: float,
+                         reason: str = "") -> None:
+    """Run the deterministic homepage-only pipeline and emit normal UI events."""
+    state = TeardownState.new(brand, hints=hints)
+    tracker = CostTracker()
+
+    if reason:
+        print(f"[auto fallback] {reason}", flush=True)
+
+    q.put({"type": "agent_start", "agent": "brand_resolver",
+           "message": "Scanning the homepage and basic metadata..."})
+    run_simple_analysis(state, tracker)
+    b = state.funnel_map.brand
+    q.put({"type": "agent_done", "agent": "brand_resolver",
+           "data": {
+               "name": b.name,
+               "website": b.website,
+               "founder": b.founder or "",
+               "confidence": b.confidence,
+               "cost": 0,
+           }})
+
+    q.put({"type": "agent_start", "agent": "touchpoint_mapper",
+           "message": "Inferring channels from homepage links..."})
+    platforms = sorted({
+        (t.platform.value if hasattr(t.platform, "value") else str(t.platform))
+        for t in state.funnel_map.touchpoints
+    })
+    q.put({"type": "agent_done", "agent": "touchpoint_mapper",
+           "data": {
+               "count": len(state.funnel_map.touchpoints),
+               "platforms": platforms[:6],
+               "cost": 0,
+           }})
+
+    q.put({"type": "agent_start", "agent": "journey_mapper",
+           "message": "Building a homepage-based funnel map..."})
+    q.put({"type": "agent_done", "agent": "journey_mapper",
+           "data": {
+               "steps": len(state.funnel_map.journey_steps),
+               "offers": len(state.funnel_map.offers),
+               "questions": len(state.funnel_map.open_questions),
+               "cost": 0,
+           }})
+
+    q.put({"type": "rendering", "message": "Rendering report..."})
+    duration = time.time() - start
+    meta = state.funnel_map.run_metadata
+    meta.timestamp = datetime.now().isoformat()
+    meta.total_cost_usd = 0
+    meta.agent_costs = tracker.agent_costs_dict()
+    meta.model_used = tracker.models_used_dict()
+    meta.duration_seconds = round(duration, 1)
+
+    try:
+        report_html = render_html(state.funnel_map)
+    except Exception as e:
+        q.put({"type": "error", "message": f"Render failed: {e}"})
+        return
+
+    report_id = str(uuid.uuid4())
+    _reports[report_id] = {"html": report_html, "brand": state.funnel_map.brand.name}
+    q.put({
+        "type": "report_ready",
+        "report_id": report_id,
+        "brand": state.funnel_map.brand.name,
+        "cost": 0,
         "duration": round(duration, 1),
         "remaining": remaining,
     })

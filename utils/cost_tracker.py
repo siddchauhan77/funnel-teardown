@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 
 # Prices per 1M tokens (input, output)
 MODEL_PRICING: dict[str, tuple[float, float]] = {
+    "deterministic": (0.0, 0.0),
     "gpt-4o-mini": (0.15, 0.60),
     "gpt-4o-mini-search-preview": (0.15, 0.60),
     "gpt-4o": (2.50, 10.00),

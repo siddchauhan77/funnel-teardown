@@ -118,3 +118,16 @@ def test_render_includes_cost_in_header():
 def test_render_includes_run_details_section():
     html = render_html(_sample_funnel_map())
     assert "gpt-4o-mini" in html or "claude-sonnet" in html
+
+
+def test_render_escapes_dynamic_text():
+    fm = _sample_funnel_map()
+    fm.brand.name = '<script>alert("x")</script>'
+    fm.journey_steps[0].whats_working = ['<img src=x onerror=alert(1)>']
+
+    html = render_html(fm)
+
+    assert '<script>alert("x")</script>' not in html
+    assert '<img src=x onerror=alert(1)>' not in html
+    assert '&lt;script&gt;' in html
+    assert '&lt;img' in html
