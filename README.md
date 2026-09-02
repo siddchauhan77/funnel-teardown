@@ -2,7 +2,7 @@
 
 **Reverse-engineer any brand's customer acquisition funnel using either a fast homepage scan or a multi-agent AI pipeline. Drop a brand name, get a source-linked stranger-to-advocate report with a scorecard, journey map, offer ladder, and export-ready files.**
 
-🔗 **[Try it live → funnelteardownai.up.railway.app](https://funnelteardownai.up.railway.app)**
+🔗 **[View the product walkthrough and sample report → funnel-teardown.vercel.app](https://funnel-teardown.vercel.app)**
 &nbsp;&nbsp;|&nbsp;&nbsp;
 📦 **[github.com/siddchauhan77/funnel-teardown](https://github.com/siddchauhan77/funnel-teardown)**
 
