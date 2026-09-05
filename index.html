@@ -546,7 +546,9 @@
       .demo-frame-wrap { height: 380px; }
     }
   </style>
-<link rel="stylesheet" href="scrollcraft/funnel.css"></head>
+<link rel="stylesheet" href="scrollcraft/funnel.css"><link rel="stylesheet" href="scrollcraft/exhibit.css">
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iIzIzNGY4OCIvPjxwYXRoIGQ9Ik04IDhoMTZsLTYgMTB2N2gtNHYtN3oiIGZpbGw9IiNkY2VhZmYiLz48L3N2Zz4=">
+</head>
 <body>
 
 <!-- Nav -->
@@ -571,18 +573,8 @@
   <div class="hero-badge">
     <span>●</span> Open Source CLI Tool
   </div>
-  <h1 class="hero-title">
-    Reverse-engineer<br>
-    <span class="gradient">any brand's funnel</span><br>
-    in minutes.
-  </h1>
-  <p class="hero-desc">
-    Drop a brand name. Get a full stranger-to-advocate funnel map
-    with Bustamante-style <strong style="color:#22C55E;">What's Working</strong> /
-    <strong style="color:#F59E0B;">What's Missing</strong> analysis —
-    powered by GPT-4o-mini + Claude Sonnet.
-    Under $0.50 per run.
-  </p>
+  <h1 class="hero-title">Map the funnel.<br><span class="gradient">Inspect the proof.</span></h1>
+  <p class="hero-desc">Explore a brand’s public touchpoints, offer sequence, and open questions in one sourced report.</p>
   <div class="hero-ctas">
     <a href="demo/ag1-teardown.html" class="btn btn-primary">
       See Demo Report (AG1) ↗
@@ -597,8 +589,14 @@
 </div><div class="funnel-exhibit"><div class="funnel-model" data-sc-verify-state="funnel-start" aria-hidden="true"><div class="funnel-axis"></div><div class="funnel-slice slice-discover"><span>Discover</span></div><div class="funnel-slice slice-consider"><span>Consider</span></div><div class="funnel-slice slice-decide"><span>Decide</span></div><div class="funnel-slice slice-return"><span>Return</span></div><div class="funnel-thread"></div></div><div class="funnel-exhibit-controls"><label for="funnel-separate">Inspect the touchpoints</label><input id="funnel-separate" type="range" min="0" max="100" value="35" aria-label="Separate the funnel layers"><p>Conceptual journey. Open the AG1 report for sourced observations.</p></div></div></div>
 
 <!-- Demo window preview -->
-<div class="demo-section">
-  <p class="demo-label">Live demo — AG1 teardown report</p>
+<div class="demo-section" data-sc-act="flow" id="report-preview">
+  <p class="demo-label">Inspect the AG1 example report</p>
+  <div class="report-lenses" aria-label="Choose report evidence">
+    <button type="button" data-report-lens="coverage" aria-pressed="true">Coverage</button>
+    <button type="button" data-report-lens="journey" aria-pressed="false">Journey</button>
+    <button type="button" data-report-lens="questions" aria-pressed="false">Open questions</button>
+  </div>
+  <p id="report-lens-note">Coverage: inspect the touchpoints represented in the example.</p>
   <div class="demo-window">
     <div class="demo-titlebar">
       <div class="demo-dots">
@@ -607,7 +605,7 @@
         <div class="demo-dot" style="background:#22C55E;"></div>
       </div>
       <div class="demo-bar">
-        <span class="demo-url">funnelteardown.vercel.app/demo/ag1-teardown.html</span>
+        <span class="demo-url">AG1 / saved example report</span>
       </div>
       <div style="width:64px;"></div>
     </div>
@@ -615,7 +613,7 @@
       <iframe class="demo-frame" src="demo/ag1-teardown.html" title="AG1 FunnelTeardown Demo"></iframe>
     </div>
     <div class="demo-cta">
-      <a href="demo/ag1-teardown.html" class="btn btn-primary" style="padding:10px 20px;">
+      <a data-selected-report href="demo/ag1-teardown.html#coverage" class="btn btn-primary" style="padding:10px 20px;">
         Open Full Report ↗
       </a>
     </div>
@@ -624,7 +622,7 @@
 
 <!-- Awareness bar -->
 <div class="awareness-section">
-  <p class="demo-label" style="margin-bottom:16px;">Schwartz 7-level awareness framework</p>
+  <p class="demo-label" style="margin-bottom:16px;">This report’s seven journey labels</p>
   <div class="awareness-bar">
     <div class="al-seg" style="background:#64748B;">Unaware</div>
     <div class="al-seg" style="background:#F59E0B;">Problem Aware</div>
@@ -634,44 +632,44 @@
     <div class="al-seg" style="background:#059669;">Customer</div>
     <div class="al-seg" style="background:#EC4899;">Advocate</div>
   </div>
-  <p style="text-align:center;font-size:12px;color:#374151;margin-top:12px;">
-    Every touchpoint, step, and offer is tagged with its awareness stage. Gaps become visible immediately.
+  <p style="text-align:center;font-size:12px;color:#a6b3c7;margin-top:12px;">
+    The report groups observations by journey stage. Missing evidence remains an open question.
   </p>
 </div>
 
 <!-- Features -->
-<section class="features">
+<section class="features" data-sc-act="flow">
   <p class="section-label">What you get</p>
-  <h2 class="section-title-center">Everything you need to steal the funnel.</h2>
+  <h2 class="section-title-center">Read what the sources support.</h2>
   <p class="section-subtitle">One command, one report, full breakdown.</p>
 
-  <div class="features-grid">
-    <div class="feature-card">
+  <div class="features-grid" data-reveal>
+    <div class="feature-card" data-sc-in>
       <div class="feature-icon">📡</div>
       <div class="feature-title">Awareness Coverage Map</div>
       <div class="feature-desc">See exactly which Schwartz stages the brand is hitting — and which gaps they're leaving open for competitors.</div>
     </div>
-    <div class="feature-card">
+    <div class="feature-card" data-sc-in>
       <div class="feature-icon">⟶</div>
       <div class="feature-title">Full Funnel Diagram</div>
       <div class="feature-desc">Mermaid.js flowchart of the complete stranger-to-advocate journey with color-coded awareness stages.</div>
     </div>
-    <div class="feature-card">
+    <div class="feature-card" data-sc-in>
       <div class="feature-icon">✓ / ⚡</div>
       <div class="feature-title">Bustamante-Style Analysis</div>
       <div class="feature-desc">What's Working and What's Missing for every single funnel step. Specific, actionable, not generic.</div>
     </div>
-    <div class="feature-card">
+    <div class="feature-card" data-sc-in>
       <div class="feature-icon">💰</div>
       <div class="feature-title">Offer Stack</div>
       <div class="feature-desc">All identified offers with price, type, awareness target, and connection to the funnel step that presents them.</div>
     </div>
-    <div class="feature-card">
+    <div class="feature-card" data-sc-in>
       <div class="feature-icon">❓</div>
       <div class="feature-title">Epistemic Honesty</div>
-      <div class="feature-desc">Open questions flag what couldn't be determined from public data — no hallucinated metrics or invented facts.</div>
+      <div class="feature-desc">Open questions distinguish what the public sources show from what remains unknown.</div>
     </div>
-    <div class="feature-card">
+    <div class="feature-card" data-sc-in>
       <div class="feature-icon">💾</div>
       <div class="feature-title">Step Cache & Resume</div>
       <div class="feature-desc">Each agent's output is cached to <code style="background:#1E2333;padding:1px 4px;border-radius:3px;font-size:12px;">.tmp/</code>. Re-run just Agent 3 without repeating the web search.</div>
@@ -680,9 +678,9 @@
 </section>
 
 <!-- Pipeline -->
-<section class="pipeline-section">
+<section class="pipeline-section" data-sc-act="flow">
   <p class="section-label">How it works</p>
-  <h2 class="section-title-center">3 agents, 1 report.</h2>
+  <h2 class="section-title-center" data-sc-cue="0 .99 0 0" data-sc-kinetic="lines">3 agents, 1 report.</h2>
   <p class="section-subtitle" style="margin-bottom:40px;">Sequential pipeline with shared Pydantic state.</p>
 
   <div class="pipeline-steps">
@@ -714,15 +712,16 @@
 </section>
 
 <!-- Quick Start -->
-<section class="quickstart" id="quickstart">
+<section class="quickstart" id="quickstart" data-sc-act="flow">
   <p class="section-label">Quick start</p>
-  <h2 class="section-title-center">Up in 3 minutes.</h2>
+  <h2 class="section-title-center">Run your first report.</h2>
   <p class="section-subtitle" style="margin-bottom:40px;">Requires Python 3.9+, an OpenAI key, and an Anthropic key.</p>
 
   <div class="qs-step">
     <div class="step-num-large">1</div>
     <div class="qs-step-content">
       <div class="qs-step-title">Clone and install</div>
+      <button type="button" class="copy-install">Copy install commands</button><span class="copy-install-status" role="status"></span>
       <p class="qs-step-desc">Clone the repo and install Python dependencies.</p>
       <div class="code-block">
 <span class="code-cmd">git clone</span> <span class="code-string">https://github.com/siddchauhan77/funnel-teardown</span><br>
@@ -775,6 +774,8 @@
   </div>
 </section>
 
+<div class="evidence-return"><p>Your selected evidence</p><a data-selected-report id="evidence-return-link" href="demo/ag1-teardown.html#coverage">Return to Coverage in the AG1 report ↗</a><p>Saved example. New analyses run locally with your own API keys.</p></div>
+<noscript><style>.report-lenses,.copy-install,.copy-install-status{display:none}.dtd-reveal{opacity:1;transform:none}</style></noscript>
 <!-- Footer -->
 <footer>
   <div class="footer-links">
@@ -1236,5 +1237,5 @@
 </script>
 <!-- DTD-CAPTURE-V4-END -->
 
-<script src="scrollcraft/scrollcraft.js"></script><script src="scrollcraft/funnel.js"></script></body>
+<script src="scrollcraft/scrollcraft.js"></script><script src="scrollcraft/funnel.js"></script><script src="scrollcraft/exhibit.js"></script></body>
 </html>
