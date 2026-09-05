@@ -4,3 +4,4 @@
 /* Keep every label clear at both ends of the separation control. */
 .funnel-model{height:520px}.slice-consider{top:125px}.slice-decide{top:230px}.slice-return{top:335px}.report-lenses button,.copy-install{font-family:inherit;font-size:13px;font-weight:600}.demo-label,.section-label{color:#a6b3c7}
 @media(max-width:850px){.funnel-model{height:475px}.slice-consider{top:120px}.slice-decide{top:220px}.slice-return{top:320px}.nav-logo{font-size:12px;white-space:nowrap}.nav-right{gap:6px}.nav-right .btn{font-size:11px;padding:9px 10px;white-space:nowrap}}
+.pipeline-model{color:#b5c7df}.btn-primary{background:#2459b0;color:#fff}.btn-primary:hover{background:#1c478f}
