@@ -12,6 +12,10 @@
     {
       "src": "README.md",
       "use": "@vercel/static"
+    },
+    {
+      "src": "scrollcraft/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
