@@ -34,7 +34,7 @@ jobs:
       - name: Prepare offline diagnostic dependencies
         if: always()
         run: |
-          python3 -m pip download --dest /tmp/portfolio-proof/wheels --python-version 313 --implementation cp --abi cp313 --platform manylinux2014_x86_64 --only-binary=:all: anthropic pytest-mock
+          python3 -m pip download --dest /tmp/portfolio-proof/wheels --python-version 313 --implementation cp --abi cp313 --platform manylinux2014_x86_64 --only-binary=:all: openai anthropic pytest-mock
       - name: Keep revision and test evidence
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
