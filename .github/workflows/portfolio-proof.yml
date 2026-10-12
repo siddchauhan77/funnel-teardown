@@ -1,0 +1,41 @@
+name: Portfolio proof gate
+on:
+  push:
+    branches: [main, 'repair/portfolio-readiness-*']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: portfolio-proof-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      OPENAI_API_KEY: ''
+      ANTHROPIC_API_KEY: ''
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Preserve exact input revision
+        run: |
+          mkdir -p /tmp/portfolio-proof
+          git rev-parse HEAD > /tmp/portfolio-proof/revision.txt
+          git archive --format=zip --output=/tmp/portfolio-proof/source.zip HEAD
+      - name: Install test dependencies
+        run: python3 -m pip install -r requirements.txt
+      - name: Run complete test suite without paid APIs
+        run: |
+          set -o pipefail
+          python3 -m pytest -q --junitxml=/tmp/portfolio-proof/junit.xml 2>&1 | tee /tmp/portfolio-proof/pytest.log
+      - name: Keep revision and test evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: portfolio-proof-baseline
+          path: /tmp/portfolio-proof/
+          retention-days: 7
+          if-no-files-found: error
